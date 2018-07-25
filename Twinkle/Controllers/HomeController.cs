@@ -21,9 +21,9 @@ namespace Twinkle.Controllers
         }
 
         
-        public JsonResult Index1(int id)
+        public IActionResult Index1(int id)
         {
-            return null;
+            return Ok("ok");
         }
 
         public void Index2(ClientModel client)

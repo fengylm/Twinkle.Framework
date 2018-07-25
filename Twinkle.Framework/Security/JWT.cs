@@ -129,10 +129,10 @@ namespace Twinkle.Framework.Security
         }
 
         /// <summary>
-        /// 把token写入到客户端head["access-token"]
+        /// 把token推送到客户端headers["access-token"]
         /// </summary>
-        /// <param name="token">要写入的token</param>
-        public void WriteToken(string token)
+        /// <param name="token">要推送的token</param>
+        public void PushToken(string token)
         {
             TwinkleContext.MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
             TwinkleContext.MvcHttpContext.Response.Headers["access-token"] = token;
