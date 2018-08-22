@@ -141,7 +141,10 @@ namespace Twinkle.Framework.Mvc
             services.AddSignalR(op =>
                 {
                     op.EnableDetailedErrors = true;
-                });
+                }).AddJsonProtocol(op =>
+                {
+                    op.PayloadSerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                }); ;
             #endregion
 
             #region 取消Form文件上传大小限制
@@ -181,7 +184,10 @@ namespace Twinkle.Framework.Mvc
             }
             #endregion
             #region 启用静态文件目录 默认是wwwroot
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                ServeUnknownFileTypes = true
+            });
             #endregion
             #region 启用Session
             app.UseSession();
