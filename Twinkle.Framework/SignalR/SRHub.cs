@@ -30,7 +30,7 @@ namespace Twinkle.Framework.SignalR
 
         private void AddClient<T>(T hub, HubClient client) where T : Hub
         {
-            SRServer<T>.Instance.AddClient(client);
+            SRService<T>.Instance.AddClient(client);
         }
 
         public override async Task OnDisconnectedAsync(Exception exception)
@@ -46,7 +46,7 @@ namespace Twinkle.Framework.SignalR
 
         private void RemoveClient<T>(T hub, string AccountId) where T : Hub
         {
-            SRServer<T>.Instance.RemoveClient(AccountId);
+            SRService<T>.Instance.RemoveClient(AccountId);
         }
     }
 }

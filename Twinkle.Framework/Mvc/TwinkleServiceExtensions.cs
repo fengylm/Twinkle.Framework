@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.IO;
 using System.Text;
 using Twinkle.Framework.Cache;
@@ -94,9 +95,13 @@ namespace Twinkle.Framework.Mvc
                         ValidateIssuerSigningKey = true,
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
-
                     };
+                    o.SecurityTokenValidators.Clear();
+                    o.SecurityTokenValidators.Add(new JWTValidator());
                 });
+
+
+
                 services.AddSingleton(typeof(JWT), (_) => { return new JWT(TwinkleContext.AppConfig.GetValue<string>("JwtToken:SecurityKey"), TwinkleContext.AppConfig.GetValue<int>("JwtToken:Expires")); });
             }
             #endregion
@@ -208,5 +213,7 @@ namespace Twinkle.Framework.Mvc
             #endregion
             return app;
         }
+
+
     }
 }

@@ -156,7 +156,7 @@ namespace Twinkle.Framework.Security
         {
             RedisService rs = TwinkleContext.GetService<RedisService>();
             JWT jwt = TwinkleContext.GetService<JWT>();
-            rs.Set(token, "", jwt.GetTokenExpires(token));
+            rs.Set(token, "", jwt.GetTokenExpires(token).AddSeconds(10));
         }
     }
 }

@@ -10,65 +10,60 @@ using Newtonsoft.Json.Linq;
 using Twinkle.Framework.Cache;
 using Twinkle.Framework.Mvc;
 using Twinkle.Framework.Security;
+using Twinkle.Models;
 
 namespace Twinkle.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        public JsonResult GetRouters()
         {
-            return View();
-        }
-
-        
-        public IActionResult Index1(int id)
-        {
-            return Ok("ok");
-        }
-
-        public void Index2(ClientModel client)
-        {
-            string a = client.GetString("key1");
-            int? b = client.GetInt("key2");
-            DateTime? c = client.GetDateTime("key3");
-            double? d = client.GetDouble("key4");
-
-            ddd e = client.GetEntity<ddd>("ttdd:ddd");
-        }
-
-        public void Index3(UploadFileArgs upload)
-        {
-           
-        }
-
-
-        public JsonResult ReadCache()
-        {
-            return Json(new
+            List<Router> lstRouter = new List<Router>();
+            lstRouter.Add(new Router
             {
-                Cache = TwinkleContext.Cache.Get("AABB")
+                cUrl = "/example",
+                cTitle = "Example1",
+                cIcon = "table",
+                Children = new Router[] {
+                    new Router
+                    {
+                        cUrl = "/tree",
+                        cPath = "layout/Login",
+                        cTitle = "Tree",
+                        cIcon = "table"
+                    },
+                    new Router
+                    {
+                        cUrl = "/table",
+                        cPath = "layout/Login",
+                        cTitle = "Table",
+                        cIcon = "table"
+                    }
+                }
             });
-        }
-
-        public JsonResult ReadSeesion()
-        {
-            return Json(new
+            lstRouter.Add(new Router
             {
-                Session = TwinkleContext.MvcHttpContext.Session.GetString("AABB")
+                cUrl = "/example1",
+                cTitle = "Example2",
+                cPath = "layout/Login",
+                cIcon = "table"
             });
+
+            return Json(lstRouter);
         }
 
-        public void WriteToken(string token)
+        [AllowAnonymous]
+        public JsonResult Login()
         {
-            TwinkleContext.MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
-            TwinkleContext.MvcHttpContext.Response.Headers["access-token"] = token;
+            TwinkleContext.Login(new { uid = "admin", userName = "系统管理员" },2);
+            return Json(new { status = 0 });
         }
-    }
 
-    public class ddd
-    {
-        public string name { get; set; }
-        public int? age { get; set; }
-        public DateTime? birthday { get; set; }
+        public JsonResult Logout()
+        {
+            TwinkleContext.Logout();
+            return Json(new { status = 0 });
+        }
     }
 }

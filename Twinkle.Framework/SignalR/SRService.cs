@@ -9,10 +9,10 @@ using Twinkle.Framework.Mvc;
 
 namespace Twinkle.Framework.SignalR
 {
-    public sealed class SRServer<T> where T : Hub
+    public sealed class SRService<T> where T : Hub
     {
         #region 私有变量
-        private readonly static Lazy<SRServer<T>> _instance = new Lazy<SRServer<T>>(() => new SRServer<T>(TwinkleContext.GetService<IHubContext<T>>(), TwinkleContext.GetService<ILoggerFactory>()));
+        private readonly static Lazy<SRService<T>> _instance = new Lazy<SRService<T>>(() => new SRService<T>(TwinkleContext.GetService<IHubContext<T>>(), TwinkleContext.GetService<ILoggerFactory>()));
         private ConcurrentDictionary<string, HubClient> _clients = new ConcurrentDictionary<string, HubClient>();
         private ConcurrentDictionary<string, Action<dynamic>> _methods = new ConcurrentDictionary<string, Action<dynamic>>();
         private readonly IHubContext<T> _context;
@@ -40,13 +40,13 @@ namespace Twinkle.Framework.SignalR
             return Task.WhenAll(new Task[] { task });
         }
 
-        public SRServer(IHubContext<T> Context, ILoggerFactory Logger)
+        public SRService(IHubContext<T> Context, ILoggerFactory Logger)
         {
             _context = Context;
             _logger = Logger;
         }
 
-        public static SRServer<T> Instance
+        public static SRService<T> Instance
         {
             get
             {

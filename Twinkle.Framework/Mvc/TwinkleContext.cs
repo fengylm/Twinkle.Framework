@@ -8,6 +8,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Twinkle.Framework.Cache;
+using Twinkle.Framework.Security;
 
 namespace Twinkle.Framework.Mvc
 {
@@ -21,6 +22,7 @@ namespace Twinkle.Framework.Mvc
         #endregion
         #region 获取缓存服务
         public static ICacheService Cache => ServiceCollection.BuildServiceProvider().GetService<ICacheService>();
+        public static ISession Session => MvcHttpContext.Session;
         #endregion
         #region 获取配置服务
         public static AppConfig AppConfig => ServiceCollection.BuildServiceProvider().GetService<AppConfig>();
@@ -100,34 +102,52 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 用户登陆
         /// </summary>
-        /// <param name="userId">用户ID</param>
-        /// <param name="userName">用户名称</param>
-        /// <param name="groupId">用户分组</param>
         /// <param name="userData">用户数据</param>
         /// <param name="Expires">登陆信息保存时间(分钟) 默认取值为 配置文件的JwtToken:Expires</param>
         /// <returns></returns>
-        public static void Login(string userId, string userName, string groupId = "", object userData = null, int? Expires = null)
+        public static void Login(object UserData, int? Expires = null)
         {
-            // TokenFactory.CreateToken(userId, userName, groupId, userData, Expires);
+            var jwt = GetService<JWT>();
+            string token = jwt.CreateToken(UserData, Expires);
+            MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
+            MvcHttpContext.Response.Headers["access-token"] = token;
         }
 
         /// <summary>
         /// 系统登出
         /// </summary>
         /// <returns></returns>
-        public void Logout()
+        public static void Logout()
         {
-            // 注销登陆时候 把要注销的用户token加入黑名单列表 通过中间件来检验注销的token,对于这些token要禁止后续访问
-            // 那么,为什么要这么处理呢,因为服务器不保存token,仅仅只会通过秘钥来验证token是否合法,所以这个token只要没过期
-            // 验证永远是有效的
+            var jwt = GetService<JWT>();
+            jwt.DestroyToken(UserToken);
         }
         #endregion
-
         #region 用户信息
         /// <summary>
         /// 获取已经登陆的用户数据
         /// </summary>
         public static object UserData => MvcHttpContext.User.Claims.Where(c => c.Type == ClaimTypes.UserData).FirstOrDefault()?.Value;
+
+        /// <summary>
+        /// 获取用户token
+        /// </summary>
+        public static string UserToken
+        {
+            get
+            {
+                string author = MvcHttpContext.Request.Headers["Authorization"];
+                if (!string.IsNullOrEmpty(author))
+                {
+                    if (author.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return author.Substring(7);
+                    }
+                    return "";
+                }
+                return "";
+            }
+        }
         #endregion
         #endregion
 

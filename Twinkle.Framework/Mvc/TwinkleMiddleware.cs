@@ -18,11 +18,11 @@ namespace Twinkle.Framework.Mvc
 
         public Task Invoke(HttpContext context)
         {
-            if (!ValidJWT(context))
-            {
-                context.Response.StatusCode = 401;
-                return Task.CompletedTask;
-            }
+            //if (!ValidJWT(context))
+            //{
+            //    context.Response.StatusCode = 401;
+            //    return Task.CompletedTask;
+            //}
             return _next(context);
         }
 

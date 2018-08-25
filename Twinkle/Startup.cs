@@ -29,8 +29,6 @@ namespace Twinkle
             //    app.UseDeveloperExceptionPage();
             //}
 
-
-
             app.UseTwinkle(routes =>
             {
                 routes.MapRoute(

@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Data.Common;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Test.Models.DataModels;
 
 namespace Test
 {
@@ -9,34 +12,18 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},main启动");
-            Excute();
-            Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},main结束");
-            Console.ReadKey();
-        }
-
-        private static void   Excute()
-        {
-            Refresh("key");
-             RefreshAsync("key");
-            Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},啦啦");
-        }
-
-        public static void RefreshAsync(string key)
-        {
-            Task.Run(() =>
+            using (demoContext dc = new demoContext())
             {
-                Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},异步写入缓存");
-                Thread.Sleep(5000);
-                Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},异步写入完成");
-            }).GetAwaiter().GetResult();
-        }
+                SysPage sp = dc.SysPage.Single(d => d.Id == 1);
+                sp.NValue = 1;
 
-        public static void Refresh(string key)
-        {
-            Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},同步写入缓存");
-            Thread.Sleep(5000);
-            Console.WriteLine($"TID:{Thread.CurrentThread.GetHashCode()},同步写入完成");
+                var c = dc.Update(sp);
+
+                c.Property("NValue").IsModified = false;
+                c.Property("Id").IsModified = false;
+                dc.SaveChanges();
+            }
         }
+       
     }
 }
