@@ -49,9 +49,10 @@ namespace Twinkle.Framework.Security
             }
 
             #endregion
-
+            int maxExpires = (Expires ?? expires) > 120 ? 120 : Expires ?? expires;
             Claim[] claim = new Claim[]{
-                    new Claim(ClaimTypes.UserData, userData.ToString())
+                    new Claim(ClaimTypes.UserData, userData.ToString()),
+                    new Claim(ClaimTypes.Expired,DateTime.Now.AddMinutes(Expires??expires).ToString("yyyy-MM-dd HH:mm:ss"))
                 };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -61,7 +62,7 @@ namespace Twinkle.Framework.Security
                     "TwinkleClient",
                     claim,
                     DateTime.Now,
-                    DateTime.Now.AddMinutes(Expires ?? expires),
+                    DateTime.Now.AddMinutes(maxExpires),
                     creds
                 );
 

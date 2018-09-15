@@ -122,6 +122,7 @@ namespace Twinkle.Framework.Mvc
             }).AddJsonOptions(op =>
             {   //序列化json格式时候,大写的首字母不自动转为小写
                 op.SerializerSettings.ContractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver();
+                op.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
             });
             #endregion
             #region 添加Session服务

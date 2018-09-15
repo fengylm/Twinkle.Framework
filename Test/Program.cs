@@ -22,6 +22,9 @@ namespace Test
                 c.Property("NValue").IsModified = false;
                 c.Property("Id").IsModified = false;
                 dc.SaveChanges();
+
+                Console.WriteLine("我");
+                Console.ReadKey();
             }
         }
        

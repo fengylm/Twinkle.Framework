@@ -1,0 +1,30 @@
+﻿{
+  "Strategy": "Abort",
+  "TableName": "testTable",
+  "Mappings": [
+    {
+      "DBColumn": "name",
+      "FileColumn": "姓名",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": true
+    },
+    {
+      "DBColumn": "age",
+      "FileColumn": "年龄",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Number",
+      "Key": false
+    },
+    {
+      "DBColumn": "birthday",
+      "FileColumn": "生日",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Date",
+      "Key": false
+    }
+  ]
+}

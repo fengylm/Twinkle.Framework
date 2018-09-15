@@ -5,16 +5,35 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="twinkle_keys\**" />
+    <Content Remove="twinkle_keys\**" />
+    <EmbeddedResource Remove="twinkle_keys\**" />
+    <None Remove="twinkle_keys\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Twinkle.Framework\Twinkle.Framework.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Aspose.Cells">
+      <HintPath>..\Twinkle.Framework\libs\Aspose.Cells.dll</HintPath>
+    </Reference>
+    <Reference Include="Aspose.Words">
+      <HintPath>..\Twinkle.Framework\libs\Aspose.Words.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
 
 </Project>
