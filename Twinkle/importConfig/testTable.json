@@ -1,9 +1,9 @@
 ﻿{
-  "Strategy": "Abort",
+  "Strategy": "Update",
   "TableName": "testTable",
   "Mappings": [
     {
-      "DBColumn": "name",
+      "DBColumn": "NAME",
       "FileColumn": "姓名",
       "Value": null,
       "Macro": 0,
@@ -11,7 +11,7 @@
       "Key": true
     },
     {
-      "DBColumn": "age",
+      "DBColumn": "AGE",
       "FileColumn": "年龄",
       "Value": null,
       "Macro": 0,
@@ -19,7 +19,7 @@
       "Key": false
     },
     {
-      "DBColumn": "birthday",
+      "DBColumn": "BIRTHDAY",
       "FileColumn": "生日",
       "Value": null,
       "Macro": 0,

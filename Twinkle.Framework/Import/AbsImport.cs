@@ -16,7 +16,12 @@ namespace Twinkle.Framework.Import
 {
     public abstract class AbsImport : IDisposable
     {
+        public AbsImport(string databaseName = "")
+        {
+            this.databaseName = databaseName;
+        }
         #region 属性
+        private string databaseName { get; }
         //导入文件生成的数据源
         private DataTable source { get; set; }
 
@@ -204,7 +209,7 @@ namespace Twinkle.Framework.Import
         /// </summary>
         /// <param name="DatabaseName">数据库连接字符串</param>
         /// <returns></returns>
-        public Task ExcuteAsync(string databaseName = "")
+        public Task ExcuteAsync()
         {
             return Task.Run(() =>
             {

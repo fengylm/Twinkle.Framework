@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Oracle.ManagedDataAccess.Client;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
@@ -6,37 +7,58 @@ using System.Linq;
 
 namespace Twinkle.Framework.Import
 {
-    public sealed class SqlImport : AbsImport
+    public sealed class OracleImport : AbsImport
     {
-        public SqlImport(string databaseName = "") : base(databaseName) { }
+        public OracleImport(string databaseName = "") : base(databaseName) { }
         protected override IDbTransaction DBTrans { get; set; }
         protected override IDbCommand DBCmd { get; set; }
 
         protected override void SubmitDatabase(DataTable source, ImportConfig config, out string temptable)
         {
-            temptable = $"#{config.TableName}_Import_tmp";
+            temptable = $"{config.TableName}_Import";
 
             //创建临时表
-            IDbCommand cmd = DBConn.CreateCommand();
-            cmd.Transaction = DBTrans;
-            cmd.CommandText = $"SELECT {string.Join(',', Fields.ToArray())} INTO {temptable} FROM {config.TableName} WHERE 1=0";
+            OracleCommand cmd = DBConn.CreateCommand() as OracleCommand;
+            cmd.Transaction = DBTrans as OracleTransaction;
+            cmd.CommandText = $"SELECT COUNT(1) FROM USER_TABLES WHERE TABLE_NAME = UPPER('{temptable}')";
+            if (Convert.ToInt32(cmd.ExecuteScalar()) > 0)
+            {
+                //删除已存在的临时表
+                cmd.CommandText = $"DROP TABLE {temptable}";
+                cmd.ExecuteNonQuery();
+            }
+
+            cmd.CommandText = $"CREATE GLOBAL TEMPORARY TABLE {temptable} ON COMMIT DELETE ROWS AS SELECT {string.Join(',', Fields.ToArray())}  FROM {config.TableName} WHERE 1=0";
             cmd.CommandType = CommandType.Text;
             cmd.ExecuteNonQuery();
 
-            //使用SqlBulkCopy批量提交
-            using (SqlBulkCopy sqlBC = new SqlBulkCopy(DBConn as SqlConnection, SqlBulkCopyOptions.CheckConstraints, DBTrans as SqlTransaction))
-            {
-                sqlBC.BatchSize = source.Rows.Count;
-                sqlBC.BulkCopyTimeout = 60;
-                sqlBC.DestinationTableName = temptable;
 
-                foreach (var item in config.Mappings)
+            //批量插入oracle
+            cmd.ArrayBindCount = source.Rows.Count;
+            cmd.CommandText = $"INSERT INTO {temptable}({string.Join(',', Fields.ToArray())})VALUES({string.Join(',', Fields.Select(p => config.Mappings.Where(c=>c.DBColumn==p).FirstOrDefault().Type== DataType.Date?$"to_date(:{p},'yyyy-mm-dd hh24:mi:ss')":$":{p}"))})";
+
+            for (int i = 0; i < source.Columns.Count; i++)
+            {
+                object[] value = new object[source.Rows.Count];
+                for (int j = 0; j < source.Rows.Count; j++)
                 {
-                    sqlBC.ColumnMappings.Add(string.IsNullOrEmpty(item.FileColumn) ? item.DBColumn : item.FileColumn, item.DBColumn);
+                    try
+                    {
+                        value[j] = source.Rows[j][i];
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new ImportException(ex.Message);
+                    }
                 }
 
-                sqlBC.WriteToServer(source);
+                OracleParameter param = CreateParameter(config.Mappings[i]);
+                param.Direction = ParameterDirection.Input;
+                param.Value = value;
+                cmd.Parameters.Add(param);
             }
+
+            cmd.ExecuteNonQuery();
         }
 
         protected override void AbortStrategy(string temptable, ImportConfig config, out int affectCount)
@@ -89,8 +111,9 @@ namespace Twinkle.Framework.Import
             cmd.Transaction = DBTrans;
             cmd.CommandType = CommandType.Text;
 
-            cmd.CommandText = $@"UPDATE {config.TableName} SET {GetUpdateField(temptable, config)} FROM {config.TableName} 
-                               INNER JOIN {temptable} ON 1=1 {GetCondition(temptable, config)}";
+            cmd.CommandText = $@"UPDATE {config.TableName} SET ({string.Join(",", Fields.Except(Keys).Select(p => $"{p}"))})
+                               = (SELECT {string.Join(",", Fields.Except(Keys).Select(p => $"{temptable}.{p}"))} FROM {temptable} WHERE 1=1 {GetCondition(temptable, config)})
+                               WHERE EXISTS (SELECT 1 FROM {temptable} WHERE 1=1 {GetCondition(temptable, config)})";
 
             affectCount = cmd.ExecuteNonQuery();
 
@@ -112,6 +135,25 @@ namespace Twinkle.Framework.Import
         private string GetUpdateField(string temptable, ImportConfig config)
         {
             return string.Join(",", Fields.Except(Keys).Select(p => $"{p}={temptable}.{p}"));
+        }
+
+        private OracleParameter CreateParameter(Mapping mapping)
+        {
+            OracleDbType type = OracleDbType.Varchar2;
+            switch (mapping.Type)
+            {
+                case DataType.Date:
+                    type = OracleDbType.Varchar2;//对于日期格式 使用varchar2的方式传值,通过to_date函数转义
+                    break;
+                case DataType.Number:
+                    type = OracleDbType.Double;
+                    break;
+                default:
+                    type = OracleDbType.Varchar2;
+                    break;
+            }
+
+            return new OracleParameter(mapping.DBColumn, type);
         }
     }
 }

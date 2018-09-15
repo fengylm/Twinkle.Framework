@@ -68,13 +68,13 @@ namespace Twinkle.Controllers
 
             string path = Path.Combine(TwinkleContext.AppRoot, "excelDemo");
             string filePath = Path.Combine(path, "导入测试.xlsx");
-            AbsImport si = new SqlImport();
+            AbsImport si = new OracleImport("Oracle");
             si.StatusReport += Si_StatusReport;
             si.RowCheck += Si_RowCheck;
             si.Init(System.IO.File.OpenRead(filePath), "testTable", new Mapping[] {
-                new Mapping{ DBColumn="GUID",Macro=Macro.Guid },
-                new Mapping{ DBColumn="INPUTDATE",Macro=Macro.Now,Type= DataType.Date },
-                new Mapping{ DBColumn="TYPE",Macro=Macro.Default,Value=1,Key=true }
+                new Mapping{ DBColumn="GUID",Macro=Macro.Guid,Type= DataType.String },
+                new Mapping{ DBColumn="INPUTDATE",Macro=Macro.Now,Type= DataType.String },
+                new Mapping{ DBColumn="TYPE",Macro=Macro.Default,Value=1,Key=true,Type= DataType.Number }
             }).ExcuteAsync();
 
             return Json(ic);
@@ -82,7 +82,7 @@ namespace Twinkle.Controllers
 
         private void Si_RowCheck(AbsImport arg1, DataRow arg2, ImportConfig arg3)
         {
-            arg1.WarningReport(new ReportArgs { Message = "哎呀哎呀,么得命咯" });
+            //arg1.WarningReport(new ReportArgs { Message = "哎呀哎呀,么得命咯" });
         }
 
         private void Si_StatusReport(ReportArgs obj)
