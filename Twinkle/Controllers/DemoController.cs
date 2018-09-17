@@ -68,7 +68,7 @@ namespace Twinkle.Controllers
 
             string path = Path.Combine(TwinkleContext.AppRoot, "excelDemo");
             string filePath = Path.Combine(path, "导入测试.xlsx");
-            AbsImport si = new OracleImport("Oracle");
+            AbsImport si = new MySqlImport("Mysql");
             si.StatusReport += Si_StatusReport;
             si.RowCheck += Si_RowCheck;
             si.Init(System.IO.File.OpenRead(filePath), "testTable", new Mapping[] {

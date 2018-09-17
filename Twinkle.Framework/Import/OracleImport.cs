@@ -37,6 +37,7 @@ namespace Twinkle.Framework.Import
             cmd.ArrayBindCount = source.Rows.Count;
             cmd.CommandText = $"INSERT INTO {temptable}({string.Join(',', Fields.ToArray())})VALUES({string.Join(',', Fields.Select(p => config.Mappings.Where(c=>c.DBColumn==p).FirstOrDefault().Type== DataType.Date?$"to_date(:{p},'yyyy-mm-dd hh24:mi:ss')":$":{p}"))})";
 
+
             for (int i = 0; i < source.Columns.Count; i++)
             {
                 object[] value = new object[source.Rows.Count];
