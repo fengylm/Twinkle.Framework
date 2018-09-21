@@ -15,7 +15,7 @@ namespace Twinkle.Framework.SignalR
             {
                 string token = this.Context.GetHttpContext().Request.Cookies["access-token"];
                 object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
-                if (userData != null)
+                if (userData != null&& TwinkleContext.GetService<JWT>().Valid(token))
                 {
                     HubClient client = new HubClient
                     {
@@ -24,6 +24,10 @@ namespace Twinkle.Framework.SignalR
                     };
                     AddClient((dynamic)this,client);
                 }
+            }
+            else
+            {
+                throw new Exception("授权无效,或已过期");
             }
             await base.OnConnectedAsync();
         }

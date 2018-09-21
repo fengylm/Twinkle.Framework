@@ -15,6 +15,7 @@ using System.IO;
 using System.Text;
 using Twinkle.Framework.Cache;
 using Twinkle.Framework.Security;
+using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Mvc
 {
@@ -174,7 +175,7 @@ namespace Twinkle.Framework.Mvc
         /// <param name="configureRoutes">MVC路由配置</param>
         /// <param name="configureHub">Signalr代理配置</param>
         /// <returns></returns>
-        public static IApplicationBuilder UseTwinkle(this IApplicationBuilder app, Action<IRouteBuilder> configureRoutes = null, Action<HubRouteBuilder> configureHub = null)
+        public static IApplicationBuilder UseTwinkle(this IApplicationBuilder app, Action<IRouteBuilder> configureRoutes = null, IList<Action<HubRouteBuilder>> configureHubs = null)
         {
             #region 启用跨域
             // 允许跨域 放在所有需要跨域的use的最上面,否则就是一个老大的坑
@@ -200,10 +201,17 @@ namespace Twinkle.Framework.Mvc
             #endregion
             #region SignalR代理配置
 
-            if (configureHub != null)
+            if (configureHubs?.Count>0)
             {
-                app.UseSignalR(configureHub);
+                foreach (var hubAction in configureHubs)
+                {
+                    app.UseSignalR(hubAction);
+                }
             }
+            app.UseSignalR(route =>
+            {
+                route.MapHub<SRHub>("/TwinkleHub");
+            });
 
             #endregion
             #region 启用中间件

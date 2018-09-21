@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Mvc;
+using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
 {
@@ -62,7 +63,9 @@ namespace Twinkle.Framework.Import
         /// <param name="ex"></param>
         public void ErrorReport(ReportArgs args)
         {
+            args.Status = 2;
             Rollback();
+            SendToClient(args);
             StatusReport?.Invoke(args);
         }
 
@@ -72,6 +75,8 @@ namespace Twinkle.Framework.Import
         /// <param name="args"></param>
         public void InfoReport(ReportArgs args)
         {
+            args.Status = 0;
+            SendToClient(args);
             StatusReport?.Invoke(args);
         }
 
@@ -81,8 +86,15 @@ namespace Twinkle.Framework.Import
         /// <param name="args"></param>
         public void WarningReport(ReportArgs args)
         {
+            args.Status = 1;
             WarningCount++;
+            SendToClient(args);
             StatusReport?.Invoke(args);
+        }
+
+        private void SendToClient(ReportArgs args)
+        {
+            SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel= "ImportMessage",Body=args });
         }
 
         #endregion
@@ -382,7 +394,7 @@ namespace Twinkle.Framework.Import
 
     public class ReportArgs
     {
-        public string Status { get; set; }
+        public int Status { get; set; }
         public string Message { get; set; }
     }
 

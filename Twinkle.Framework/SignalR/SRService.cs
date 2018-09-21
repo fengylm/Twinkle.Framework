@@ -68,7 +68,7 @@ namespace Twinkle.Framework.SignalR
         internal void AddClient(HubClient client)
         {
 
-         //   _context.Groups.AddToGroupAsync(client.ConnectionId, client.GroupId);
+            //   _context.Groups.AddToGroupAsync(client.ConnectionId, client.GroupId);
             _clients.AddOrUpdate(client.AccountId, client, (key, oldValue) =>
             {
                 //if (oldValue.ConnectionId != client.ConnectionId)
@@ -88,7 +88,7 @@ namespace Twinkle.Framework.SignalR
 
             if (_clients.TryRemove(AccountId, out client))
             {
-               // _context.Groups.RemoveFromGroupAsync(client.ConnectionId, client.GroupId);
+                // _context.Groups.RemoveFromGroupAsync(client.ConnectionId, client.GroupId);
             }
         }
         #endregion
@@ -98,9 +98,10 @@ namespace Twinkle.Framework.SignalR
         /// 发送消息给指定用户
         /// </summary>
         /// <param name="AccountId">接收消息的用户ID</param>
+        /// <param name="Message">消息对象</param>
         /// <param name="Listener">前端监听对象,就是前台connection.on的第一个参数</param>
-        /// <param name="Message">消息字符串</param>
-        public Task Send(string AccountId, string Listener, string Message)
+
+        public Task Send(string AccountId,SignalrResponse Message, string Listener = "ServerMessage")
         {
             return _context.Clients.Client(_clients.Where(c => c.Key == AccountId).FirstOrDefault().Value?.ConnectionId).SendCoreAsync(Listener, new object[] { Message });
         }
@@ -108,10 +109,10 @@ namespace Twinkle.Framework.SignalR
         /// 通过ConnectionId 发送给指定对象
         /// </summary>
         /// <param name="ConnectionId">当前客户端连接ID</param>
+        /// <param name="Message">消息对象</param>
         /// <param name="Listener">前端监听对象,就是前台connection.on的第一个参数</param>
-        /// <param name="Message">消息字符串</param>
         /// <returns></returns>
-        public Task SendByConnectionId(string ConnectionId, string Listener, string Message)
+        public Task SendByConnectionId(string ConnectionId, SignalrResponse Message, string Listener = "ServerMessage")
         {
             return _context.Clients.Client(ConnectionId).SendCoreAsync(Listener, new object[] { Message });
         }
@@ -119,10 +120,10 @@ namespace Twinkle.Framework.SignalR
         /// <summary>
         /// 发送消息给所有用户
         /// </summary>
+        /// <param name="Message">消息对象</param>
         /// <param name="Listener">前端监听对象,就是前台connection.on的第一个参数</param>
-        /// <param name="Message">消息字符串</param>
         /// <param name="ExceptAccountIds">群发时,需要屏蔽的用户ID</param>
-        public Task SendAll(string Listener, string Message, string[] ExceptAccountIds = null)
+        public Task SendAll(SignalrResponse Message, string Listener="ServerMessage", string[] ExceptAccountIds = null)
         {
             //signalr自带的客户客户端管理模块是不和用户认证关联的,所以同一个账号在两个浏览器登陆的时候
             //后登陆的不会把前登陆的覆盖,在signalr中是会被识别为两个客户端的
@@ -132,7 +133,7 @@ namespace Twinkle.Framework.SignalR
             {
                 if (!(ExceptAccountIds?.Contains(item.Value.AccountId) == true))
                 {
-                    tasks.Add(SendByConnectionId(item.Value.ConnectionId, Listener, Message));
+                    tasks.Add(SendByConnectionId(item.Value.ConnectionId, Message, Listener));
                 }
             }
             return Task.WhenAll(tasks);
@@ -143,9 +144,9 @@ namespace Twinkle.Framework.SignalR
         ///// </summary>
         ///// <param name="GroupId">组ID</param>
         ///// <param name="Listener">前端监听对象,就是前台connection.on的第一个参数</param>
-        ///// <param name="Message">消息字符串</param>
+        ///// <param name="Message">消息对象</param>
         ///// <param name="ExceptAccountIds">组群发时,需要屏蔽的用户ID</param>
-        //public Task SendGroup(string GroupId, string Listener, string Message, string[] ExceptAccountIds = null)
+        //public Task SendGroup(string GroupId, string Listener, SignalrResponse Message, string[] ExceptAccountIds = null)
         //{
         //    //组群发不accountId排除发送,自己判断实现
         //    var tasks = new List<Task>();
@@ -186,5 +187,12 @@ namespace Twinkle.Framework.SignalR
         /// 客户端连接id
         /// </summary>
         public string ConnectionId { get; set; }
+    }
+
+    public class SignalrResponse
+    {
+        public string Channel { get; set; }
+
+        public object Body { get; set; }
     }
 }
