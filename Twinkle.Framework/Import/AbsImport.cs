@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Mvc;
+using Twinkle.Framework.Security;
 using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
@@ -65,6 +66,7 @@ namespace Twinkle.Framework.Import
         {
             args.Status = 2;
             Rollback();
+            args.Message = $"<strong style='color:red'>{ args.Message}</strong>";
             SendToClient(args);
             StatusReport?.Invoke(args);
         }
@@ -88,13 +90,20 @@ namespace Twinkle.Framework.Import
         {
             args.Status = 1;
             WarningCount++;
+            args.Message = $"<strong style='color:red'>{ args.Message}</strong>";
             SendToClient(args);
             StatusReport?.Invoke(args);
         }
 
         private void SendToClient(ReportArgs args)
         {
-            SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel= "ImportMessage",Body=args });
+            //string token = TwinkleContext.MvcHttpContext.Request.Cookies["access-token"];
+
+            //object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
+
+            //SRService<SRHub>.Instance.Send(JToken.Parse(userData.ToString()).Value<string>("uid"), new SignalrResponse { Channel = "ServerMessage", Body = args });
+
+            SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
         }
 
         #endregion
@@ -264,6 +273,7 @@ namespace Twinkle.Framework.Import
                             }
                             break;
                     }
+                    InfoReport(new ReportArgs { Message = "数据导入完成." });
                     Commit();
                 }
                 catch (Exception ex)

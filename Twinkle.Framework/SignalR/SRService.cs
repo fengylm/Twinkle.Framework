@@ -163,36 +163,5 @@ namespace Twinkle.Framework.SignalR
         #endregion
     }
 
-    public class HubClient
-    {
-        public string ConnectionId { get; set; }
-
-        public string AccountId { get; set; }
-
-    }
-
-    public class HubArgs
-    {
-        /// <summary>
-        /// 订阅名称
-        /// </summary>
-        public string PublishName { get; set; }
-
-        /// <summary>
-        /// 参数
-        /// </summary>
-        public dynamic PublishArgs { get; set; }
-
-        /// <summary>
-        /// 客户端连接id
-        /// </summary>
-        public string ConnectionId { get; set; }
-    }
-
-    public class SignalrResponse
-    {
-        public string Channel { get; set; }
-
-        public object Body { get; set; }
-    }
+    
 }
