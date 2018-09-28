@@ -125,8 +125,7 @@ namespace Twinkle.Framework.Security
         /// <returns></returns>
         public bool Valid(string token)
         {
-            RedisService rs = TwinkleContext.GetService<RedisService>();
-            return DateTime.Now < GetTokenExpires(token) && !rs.Exists(token);
+            return DateTime.Now < GetTokenExpires(token) && !TwinkleContext.Cache.Exists(token);
         }
 
         /// <summary>
@@ -155,9 +154,8 @@ namespace Twinkle.Framework.Security
         /// <param name="token"></param>
         public void DestroyToken(string token)
         {
-            RedisService rs = TwinkleContext.GetService<RedisService>();
             JWT jwt = TwinkleContext.GetService<JWT>();
-            rs.Set(token, "", jwt.GetTokenExpires(token).AddSeconds(10));
+            TwinkleContext.Cache.Set(token,"",null, jwt.GetTokenExpires(token).AddSeconds(10));
         }
     }
 }

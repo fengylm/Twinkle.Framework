@@ -14,9 +14,8 @@ namespace Twinkle.Framework.Security
     {
         public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
-            RedisService rs = TwinkleContext.GetService<RedisService>();
             //如果是已经拉入黑名单的token则直接提示验证失败
-            if (!rs.Exists(securityToken))
+            if (!TwinkleContext.Cache.Exists(securityToken))
             {
                 //后期可以在这里处理token刷新
                 try

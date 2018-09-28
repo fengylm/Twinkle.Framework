@@ -52,22 +52,24 @@ namespace Twinkle.Framework.Mvc
                         options.Configuration = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries)[0];
                         options.InstanceName = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerName");
                     });
+
+                    services.AddSingleton(typeof(RedisService), (_) =>
+                    {
+                        return new RedisService(new RedisConfig
+                        {
+                            Password = TwinkleContext.AppConfig.GetValue<string>("Redis:Password"),
+                            SentinelHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:SentinelHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                            ServerHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                            ServerName = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerName")
+                        });
+                    });
                     break;
                 default:
                     services.AddDistributedMemoryCache();
                     break;
             }
             services.AddSingleton(typeof(ICacheService), typeof(CacheService));
-            services.AddSingleton(typeof(RedisService), (_) =>
-            {
-                return new RedisService(new RedisConfig
-                {
-                    Password = TwinkleContext.AppConfig.GetValue<string>("Redis:Password"),
-                    SentinelHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:SentinelHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
-                    ServerHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
-                    ServerName = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerName")
-                });
-            });
+
             #endregion
             #region 添加数据签名保护服务
             services.AddDataProtection(opts =>
@@ -201,7 +203,7 @@ namespace Twinkle.Framework.Mvc
             #endregion
             #region SignalR代理配置
 
-            if (configureHubs?.Count>0)
+            if (configureHubs?.Count > 0)
             {
                 foreach (var hubAction in configureHubs)
                 {
