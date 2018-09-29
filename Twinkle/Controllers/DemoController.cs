@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Aspose.Cells;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Import;
@@ -13,6 +14,7 @@ namespace Twinkle.Controllers
 {
     public class DemoController : Controller
     {
+        #region excel操作
         public JsonResult CreateExcel()
         {
             Workbook wb = new Workbook();
@@ -53,7 +55,10 @@ namespace Twinkle.Controllers
             DataTable dt = DataReader.ReadEntireDataTable(Path.Combine(path, "代码生成.xlsx"));
 
             return Json(new { status = 0 });
-        }
+        } 
+        #endregion
+
+        #region 导入测试
 
         public JsonResult ImportC()
         {
@@ -88,6 +93,13 @@ namespace Twinkle.Controllers
         private void Si_StatusReport(ReportArgs obj)
         {
             Console.WriteLine(obj.Message);
+        }
+        #endregion
+
+        [AllowAnonymous]
+        public async Task Upload(UploadFileArgs args)
+        {
+            //await args.Save();
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.File;
@@ -218,6 +219,7 @@ namespace Twinkle.Framework.Import
         /// <param name="mappings">自定义导入映射</param>
         public AbsImport Init(Stream fileStream, string configName, Mapping[] mappings = null)
         {
+            Thread.Sleep(500);//延时0.5秒,确保前台信息确实已经更新完成
             InfoReport(new ReportArgs { Message = "读取导入文件信息..." });
             source = DataReader.ReadEntireDataTable(fileStream);
 
@@ -273,7 +275,6 @@ namespace Twinkle.Framework.Import
                             }
                             break;
                     }
-                    InfoReport(new ReportArgs { Message = "数据导入完成." });
                     Commit();
                 }
                 catch (Exception ex)

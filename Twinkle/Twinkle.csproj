@@ -6,9 +6,13 @@
 
   <ItemGroup>
     <Compile Remove="twinkle_keys\**" />
+    <Compile Remove="UploadFiles\**" />
     <Content Remove="twinkle_keys\**" />
+    <Content Remove="UploadFiles\**" />
     <EmbeddedResource Remove="twinkle_keys\**" />
+    <EmbeddedResource Remove="UploadFiles\**" />
     <None Remove="twinkle_keys\**" />
+    <None Remove="UploadFiles\**" />
   </ItemGroup>
 
   <ItemGroup>
