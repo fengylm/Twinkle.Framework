@@ -9,9 +9,9 @@ using System.Text;
 
 namespace Twinkle.Framework.Import
 {
-    public sealed class MySqlImport : AbsImport
+    public sealed class MySqlImport : BaseImport
     {
-        public MySqlImport(string databaseName = "") : base(databaseName) { }
+        internal MySqlImport(string databaseName = "") : base(databaseName) { }
         protected override IDbTransaction DBTrans { get; set; }
         protected override IDbCommand DBCmd { get; set; }
 

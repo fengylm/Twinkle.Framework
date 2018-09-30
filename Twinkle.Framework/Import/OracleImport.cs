@@ -7,9 +7,9 @@ using System.Linq;
 
 namespace Twinkle.Framework.Import
 {
-    public sealed class OracleImport : AbsImport
+    public sealed class OracleImport : BaseImport
     {
-        public OracleImport(string databaseName = "") : base(databaseName) { }
+        internal OracleImport(string databaseName = "") : base(databaseName) { }
         protected override IDbTransaction DBTrans { get; set; }
         protected override IDbCommand DBCmd { get; set; }
 

@@ -17,9 +17,9 @@ using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
 {
-    public abstract class AbsImport : IDisposable
+    public abstract class BaseImport : IDisposable
     {
-        public AbsImport(string databaseName = "")
+        public BaseImport(string databaseName)
         {
             this.databaseName = databaseName;
         }
@@ -57,7 +57,7 @@ namespace Twinkle.Framework.Import
         #region 事件
         public event Action<ReportArgs> StatusReport;
 
-        public event Action<AbsImport, DataRow, ImportConfig> RowCheck;
+        public event Action<BaseImport, DataRow, ImportConfig> RowCheck;
 
         /// <summary>
         /// 异常信息报告,报告完后直接终止导入的所有操作
@@ -98,13 +98,13 @@ namespace Twinkle.Framework.Import
 
         private void SendToClient(ReportArgs args)
         {
-            //string token = TwinkleContext.MvcHttpContext.Request.Cookies["access-token"];
+            string token = TwinkleContext.MvcHttpContext.Request.Cookies["access-token"];
 
-            //object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
+            object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
 
-            //SRService<SRHub>.Instance.Send(JToken.Parse(userData.ToString()).Value<string>("uid"), new SignalrResponse { Channel = "ServerMessage", Body = args });
+            SRService<SRHub>.Instance.Send(JToken.Parse(userData.ToString()).Value<string>("uid"), new SignalrResponse { Channel = "ServerMessage", Body = args });
 
-            SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
+            //SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
         }
 
         #endregion
@@ -217,7 +217,7 @@ namespace Twinkle.Framework.Import
         /// <param name="fileStream">文件流</param>
         /// <param name="configName">配置名称</param>
         /// <param name="mappings">自定义导入映射</param>
-        public AbsImport Init(Stream fileStream, string configName, Mapping[] mappings = null)
+        public BaseImport Init(Stream fileStream, string configName, Mapping[] mappings = null)
         {
             Thread.Sleep(500);//延时0.5秒,确保前台信息确实已经更新完成
             InfoReport(new ReportArgs { Message = "读取导入文件信息..." });
@@ -283,6 +283,7 @@ namespace Twinkle.Framework.Import
                 }
             });
         }
+
         #endregion
 
         #region 抽象方法
@@ -396,7 +397,7 @@ namespace Twinkle.Framework.Import
             }
         }
 
-        ~AbsImport()
+        ~BaseImport()
         {
             Dispose(false);
         }

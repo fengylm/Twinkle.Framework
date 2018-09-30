@@ -73,7 +73,7 @@ namespace Twinkle.Controllers
 
             string path = Path.Combine(TwinkleContext.AppRoot, "excelDemo");
             string filePath = Path.Combine(path, "导入测试.xlsx");
-            AbsImport si = new MySqlImport("Mysql");
+            BaseImport si = ImportFactory.CreateImport("Mysql");
             si.StatusReport += Si_StatusReport;
             si.RowCheck += Si_RowCheck;
             si.Init(System.IO.File.OpenRead(filePath), "testTable", new Mapping[] {
@@ -85,7 +85,7 @@ namespace Twinkle.Controllers
             return Json(ic);
         }
 
-        private void Si_RowCheck(AbsImport arg1, DataRow arg2, ImportConfig arg3)
+        private void Si_RowCheck(BaseImport arg1, DataRow arg2, ImportConfig arg3)
         {
             //arg1.WarningReport(new ReportArgs { Message = "哎呀哎呀,么得命咯" });
         }
@@ -99,7 +99,14 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public async Task Upload(UploadFileArgs args)
         {
-            //await args.Save();
+            BaseImport si = ImportFactory.CreateImport();
+            si.Init(args.FileStream, "testTable", new Mapping[] {
+                new Mapping{ DBColumn="GUID",Macro=Macro.Guid,Type= DataType.String },
+                new Mapping{ DBColumn="INPUTDATE",Macro=Macro.Now,Type= DataType.String },
+                new Mapping{ DBColumn="TYPE",Macro=Macro.Default,Value=1,Key=true,Type= DataType.Number }
+            });
+
+            await si.ExcuteAsync();
         }
     }
 }
