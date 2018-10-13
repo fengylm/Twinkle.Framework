@@ -163,7 +163,7 @@ namespace Twinkle.Framework.Import
                 throw new ImportException("数据列校验异常,导入终止");
             }
 
-            source = source.DefaultView.ToTable(false, config.Mappings.Select(p => string.IsNullOrEmpty(p.FileColumn) ? p.DBColumn : p.FileColumn).ToArray());
+            source = source.DefaultView.ToTable(false, config.Mappings.Select(p => p.FileColumn).ToArray());
             int rowIndex = 0;//数据行号
             foreach (DataRow row in source.Rows)
             {
@@ -177,7 +177,7 @@ namespace Twinkle.Framework.Import
                 //检测必输栏位
                 foreach (var item in config.Mappings.Where(p => p.AllowNull == false))
                 {
-                    if (row[item.DBColumn] == null || row[item.DBColumn].ToString() == "")
+                    if (row[item.FileColumn] == null || row[item.FileColumn].ToString() == "")
                     {
                         WarningReport(new ReportArgs
                         {

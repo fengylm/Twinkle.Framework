@@ -32,10 +32,26 @@ namespace Twinkle.Framework.Import
         /// </summary>
         public string DBColumn { get; set; }
 
+
+        private string fileColumn = string.Empty;
         /// <summary>
         /// 文件字段
         /// </summary>
-        public string FileColumn { get; set; }
+        public string FileColumn
+        {
+            get
+            {
+                if (fileColumn == string.Empty || Macro != Macro.None)
+                {
+                    return DBColumn;
+                }
+                return fileColumn;
+            }
+            set
+            {
+                fileColumn = value;
+            }
+        }
 
         /// <summary>
         /// 默认值

@@ -55,47 +55,10 @@ namespace Twinkle.Controllers
             DataTable dt = DataReader.ReadEntireDataTable(Path.Combine(path, "代码生成.xlsx"));
 
             return Json(new { status = 0 });
-        } 
+        }
         #endregion
 
         #region 导入测试
-
-        public JsonResult ImportC()
-        {
-            ImportConfig ic = new ImportConfig();
-            ic.Strategy = Strategy.Cover;
-            ic.TableName = "testTable";
-            ic.Mappings = new Mapping[] {
-                new Mapping{ Key=false,DBColumn="name",FileColumn="姓名",Type= DataType.String },
-                new Mapping{ Key=false,DBColumn="age",FileColumn="年1龄",Type= DataType.Number },
-                new Mapping{ Key=false,DBColumn="birthday",FileColumn="生日",Type= DataType.Date }
-            };
-
-            string path = Path.Combine(TwinkleContext.AppRoot, "excelDemo");
-            string filePath = Path.Combine(path, "导入测试.xlsx");
-            BaseImport si = ImportFactory.CreateImport("Mysql");
-            si.StatusReport += Si_StatusReport;
-            si.RowCheck += Si_RowCheck;
-            si.Init(System.IO.File.OpenRead(filePath), "testTable", new Mapping[] {
-                new Mapping{ DBColumn="GUID",Macro=Macro.Guid,Type= DataType.String },
-                new Mapping{ DBColumn="INPUTDATE",Macro=Macro.Now,Type= DataType.String },
-                new Mapping{ DBColumn="TYPE",Macro=Macro.Default,Value=1,Key=true,Type= DataType.Number }
-            }).ExcuteAsync();
-
-            return Json(ic);
-        }
-
-        private void Si_RowCheck(BaseImport arg1, DataRow arg2, ImportConfig arg3)
-        {
-            //arg1.WarningReport(new ReportArgs { Message = "哎呀哎呀,么得命咯" });
-        }
-
-        private void Si_StatusReport(ReportArgs obj)
-        {
-            Console.WriteLine(obj.Message);
-        }
-        #endregion
-
         [AllowAnonymous]
         public async Task Upload(UploadFileArgs args)
         {
@@ -107,6 +70,13 @@ namespace Twinkle.Controllers
             });
 
             await si.ExcuteAsync();
+        }
+        #endregion
+
+        [AllowAnonymous]
+        public IActionResult downLoad()
+        {
+            return File(new FileStream(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"), FileMode.Open), "application/octet-stream", "导入测试.xlsx");
         }
     }
 }

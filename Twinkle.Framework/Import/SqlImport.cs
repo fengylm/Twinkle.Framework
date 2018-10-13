@@ -32,7 +32,7 @@ namespace Twinkle.Framework.Import
 
                 foreach (var item in config.Mappings)
                 {
-                    sqlBC.ColumnMappings.Add(string.IsNullOrEmpty(item.FileColumn) ? item.DBColumn : item.FileColumn, item.DBColumn);
+                    sqlBC.ColumnMappings.Add(item.FileColumn, item.DBColumn);
                 }
 
                 sqlBC.WriteToServer(source);

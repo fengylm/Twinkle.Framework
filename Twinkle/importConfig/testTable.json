@@ -16,7 +16,8 @@
       "Value": null,
       "Macro": 0,
       "Type": "Number",
-      "Key": false
+      "Key": false,
+      "AllowNull": false
     },
     {
       "DBColumn": "BIRTHDAY",
