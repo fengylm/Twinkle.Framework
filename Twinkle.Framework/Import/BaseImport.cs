@@ -57,7 +57,7 @@ namespace Twinkle.Framework.Import
         #region 事件
         public event Action<ReportArgs> StatusReport;
 
-        public event Action<BaseImport, DataRow, ImportConfig> RowCheck;
+        public event Action<BaseImport, DataRow, int, ImportConfig> RowCheck;
 
         /// <summary>
         /// 异常信息报告,报告完后直接终止导入的所有操作
@@ -164,14 +164,31 @@ namespace Twinkle.Framework.Import
             }
 
             source = source.DefaultView.ToTable(false, config.Mappings.Select(p => string.IsNullOrEmpty(p.FileColumn) ? p.DBColumn : p.FileColumn).ToArray());
-
+            int rowIndex = 0;//数据行号
             foreach (DataRow row in source.Rows)
             {
+                //检测非None宏类型
                 foreach (var item in config.Mappings.Where(p => p.Macro != Macro.None))
                 {
                     row[item.DBColumn] = MacroValue(item);
                 }
-                RowCheck?.Invoke(this, row, config);
+
+
+                //检测必输栏位
+                foreach (var item in config.Mappings.Where(p => p.AllowNull == false))
+                {
+                    if (row[item.DBColumn] == null || row[item.DBColumn].ToString() == "")
+                    {
+                        WarningReport(new ReportArgs
+                        {
+                            Message = $"第{rowIndex + 2}行,列[{item.FileColumn}]不允许空值."
+                        });
+                    }
+
+                }
+
+                RowCheck?.Invoke(this, row, rowIndex, config);
+                rowIndex++;
             }
             if (WarningCount > 0)
             {

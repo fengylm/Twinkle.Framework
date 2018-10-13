@@ -31,6 +31,7 @@ namespace Twinkle.Framework.Import
         /// 数据库字段
         /// </summary>
         public string DBColumn { get; set; }
+
         /// <summary>
         /// 文件字段
         /// </summary>
@@ -45,15 +46,22 @@ namespace Twinkle.Framework.Import
         /// 宏 设置为非None的时候,FileColumn无效,设置为default的时候,取Value字段的固定值
         /// </summary>
         public Macro Macro { get; set; }
+
         /// <summary>
         /// 数据类型
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
         public DataType Type { get; set; } = DataType.String;
+
         /// <summary>
         /// 是否主键
         /// </summary>
         public bool Key { get; set; }
+
+        /// <summary>
+        /// 是否允许空 默认true
+        /// </summary>
+        public bool AllowNull { get; set; } = true;
     }
 
     public enum DataType
