@@ -2,6 +2,7 @@
 using System.Data;
 using System.IO;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Aspose.Cells;
 using Microsoft.AspNetCore.Authorization;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Import;
 using Twinkle.Framework.Mvc;
+using Twinkle.Framework.Util;
 
 namespace Twinkle.Controllers
 {
@@ -74,9 +76,12 @@ namespace Twinkle.Controllers
         #endregion
 
         [AllowAnonymous]
-        public IActionResult downLoad()
+        public IActionResult downLoad(ClientModel client)
         {
-            return File(new FileStream(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"), FileMode.Open), "application/octet-stream", "导入测试.xlsx");
+            string code = client.GetString("code");
+
+            return WebHelper.DownLoad(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"));
+
         }
     }
 }
