@@ -6,9 +6,9 @@ using Twinkle.Framework.Mvc;
 
 namespace Twinkle.Framework.Import
 {
-    public abstract class ImportFactory
+    public abstract class DataImportFactory
     {
-        public static BaseImport CreateImport(string databaseName = "")
+        public static DataImport CreateDataImport(string databaseName = "")
         {
             if (string.IsNullOrEmpty(databaseName))
             {

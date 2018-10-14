@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Twinkle.Framework.Import
 {
-    public sealed class SqlImport : BaseImport
+    public sealed class SqlImport : DataImport
     {
         internal SqlImport(string databaseName = "") : base(databaseName) { }
         protected override IDbTransaction DBTrans { get; set; }

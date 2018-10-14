@@ -17,9 +17,9 @@ using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
 {
-    public abstract class BaseImport : IDisposable
+    public abstract class DataImport : IDisposable
     {
-        public BaseImport(string databaseName)
+        public DataImport(string databaseName)
         {
             this.databaseName = databaseName;
         }
@@ -57,7 +57,7 @@ namespace Twinkle.Framework.Import
         #region 事件
         public event Action<ReportArgs> StatusReport;
 
-        public event Action<BaseImport, DataRow, int, ImportConfig> RowCheck;
+        public event Action<DataImport, DataRow, int, ImportConfig> RowCheck;
 
         /// <summary>
         /// 异常信息报告,报告完后直接终止导入的所有操作
@@ -234,7 +234,7 @@ namespace Twinkle.Framework.Import
         /// <param name="fileStream">文件流</param>
         /// <param name="configName">配置名称</param>
         /// <param name="mappings">自定义导入映射</param>
-        public BaseImport Init(Stream fileStream, string configName, Mapping[] mappings = null)
+        public DataImport Init(Stream fileStream, string configName, Mapping[] mappings = null)
         {
             Thread.Sleep(500);//延时0.5秒,确保前台信息确实已经更新完成
             InfoReport(new ReportArgs { Message = "读取导入文件信息..." });
@@ -414,7 +414,7 @@ namespace Twinkle.Framework.Import
             }
         }
 
-        ~BaseImport()
+        ~DataImport()
         {
             Dispose(false);
         }

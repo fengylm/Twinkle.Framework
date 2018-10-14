@@ -64,7 +64,7 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public async Task Upload(UploadFileArgs args)
         {
-            BaseImport si = ImportFactory.CreateImport();
+            DataImport si = DataImportFactory.CreateDataImport();
             si.Init(args.FileStream, "testTable", new Mapping[] {
                 new Mapping{ DBColumn="GUID",Macro=Macro.Guid,Type= DataType.String },
                 new Mapping{ DBColumn="INPUTDATE",Macro=Macro.Now,Type= DataType.String },
