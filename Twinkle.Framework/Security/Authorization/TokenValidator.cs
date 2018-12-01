@@ -1,9 +1,10 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Twinkle.Framework.Cache;
+using Twinkle.Framework.Extensions;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Twinkle.Framework.Mvc;
 
-namespace Twinkle.Framework.Authorization
+namespace Twinkle.Framework.Security.Authorization
 {
     public class TokenValidator : JwtSecurityTokenHandler
     {

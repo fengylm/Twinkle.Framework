@@ -1,14 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Twinkle.Framework.Mvc
+namespace Twinkle.Framework.Extensions
 {
     public class ClientModel
     {
+        private HttpContext httpContext;
+
+        public ClientModel(ModelBindingContext bindContext)
+        {
+            httpContext = bindContext.HttpContext;
+        }
+
         /// <summary>
         /// 获取整型参数
         /// </summary>
@@ -82,7 +90,16 @@ namespace Twinkle.Framework.Mvc
         /// <returns></returns>
         public T GetEntity<T>(string key) where T : class, new()
         {
-            return JToken.Parse(GetValue(key)?.ToString()).ToObject<T>();
+            object value = GetValue(key);
+            if (value != null)
+            {
+                return JToken.Parse(GetValue(key)?.ToString()).ToObject<T>();
+            }
+            else
+            {
+                return default(T);
+            }
+
         }
 
         private object GetValue(string key)
@@ -93,7 +110,7 @@ namespace Twinkle.Framework.Mvc
                 return null;
             }
             JToken result = ClientParams;
-            while(keys.Count>0)
+            while (keys.Count > 0)
             {
                 result = result[keys[0]];
                 keys.RemoveAt(0);
@@ -101,9 +118,9 @@ namespace Twinkle.Framework.Mvc
             return result;
         }
 
-        private static JToken FindChild(JObject Parent, List<string> keys)
+        private static JToken FindChild(JObject parent, List<string> keys)
         {
-            if (Parent.TryGetValue(keys[0], StringComparison.InvariantCultureIgnoreCase, out JToken child))
+            if (parent.TryGetValue(keys[0], StringComparison.InvariantCultureIgnoreCase, out JToken child))
             {
                 if (keys.Count > 1)
                 {
@@ -125,21 +142,21 @@ namespace Twinkle.Framework.Mvc
             {
                 if (clientParams == null)
                 {
-                    JObject query = new JObject() ;
+                    JObject query = new JObject();
                     try
                     {
                         //获取浏览器参数,get和post都会有
-                        foreach (var item in TwinkleContext.MvcHttpContext.Request.Query)
+                        foreach (var item in httpContext.Request.Query)
                         {
                             query.Add(new JProperty(item.Key.ToString(), item.Value.ToString()));
                         }
 
-                        if (TwinkleContext.MvcHttpContext.Request.Method.Equals("POST",StringComparison.OrdinalIgnoreCase))
+                        if (httpContext.Request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
                         {
                             //POST 提交时,从Form获得表单参数
-                            if (TwinkleContext.MvcHttpContext.Request.HasFormContentType)
+                            if (httpContext.Request.HasFormContentType && httpContext.Request.Form.Keys.Count > 0)
                             {
-                                foreach (var item in TwinkleContext.MvcHttpContext.Request.Form)
+                                foreach (var item in httpContext.Request.Form)
                                 {
                                     query.Add(new JProperty(item.Key.ToString(), item.Value.ToString()));
                                 }
@@ -147,11 +164,11 @@ namespace Twinkle.Framework.Mvc
                             else
                             {
                                 //POST 提交时,从body获取提交参数
-                                int bodyLength = (int)TwinkleContext.MvcHttpContext.Request.ContentLength;
+                                int bodyLength = (int)(httpContext.Request.ContentLength ?? 0);
                                 if (bodyLength > 0)
                                 {
                                     byte[] buffer = new byte[bodyLength];
-                                    TwinkleContext.MvcHttpContext.Request.Body.Read(buffer, 0, buffer.Length);
+                                    httpContext.Request.Body.Read(buffer, 0, buffer.Length);
                                     var paramObj = JToken.Parse(Encoding.UTF8.GetString(buffer));
                                     foreach (var item in paramObj)
                                     {
@@ -161,9 +178,8 @@ namespace Twinkle.Framework.Mvc
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
-
                         throw ex;
                     }
                     clientParams = query;

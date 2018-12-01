@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Twinkle.Framework.Authorization
+﻿namespace Twinkle.Framework.Security.Authorization
 {
     public static class TwinkleClaimTypes
     {

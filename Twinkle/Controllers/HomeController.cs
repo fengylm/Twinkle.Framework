@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using Twinkle.Framework.Authorization;
-using Twinkle.Framework.Cache;
-using Twinkle.Framework.Mvc;
-using Twinkle.Framework.Security;
+using System;
+using System.Collections.Generic;
+using Twinkle.Framework.Extensions;
+using Twinkle.Framework.Security.Authorization;
 using Twinkle.Models;
 
 namespace Twinkle.Controllers
@@ -64,7 +58,7 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public JsonResult Login()
         {
-            TwinkleContext.Login(new User { UserId = "admin" }, 200);
+            TwinkleContext.Login(new AuthUser { UserId = "admin" }, 200);
             return Json(new { status = 0 });
         }
 

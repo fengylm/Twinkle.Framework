@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
-using Twinkle.Framework.Authorization;
-using Twinkle.Framework.Mvc;
 
 namespace Twinkle.Framework.SignalR
 {

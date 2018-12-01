@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Twinkle.Framework.Authorization
+﻿namespace Twinkle.Framework.Security.Authorization
 {
-    public class User
+    public class AuthUser
     {
         public int? TenantId { get; set; }
 
         public string UserId { get; set; }
+
+        public string UserName { get; set; }
 
         public string GroupId { get; set; }
 

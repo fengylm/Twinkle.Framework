@@ -7,9 +7,9 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
-using Twinkle.Framework.Mvc;
 using System.Data.Common;
-using Twinkle.Framework.Security;
+using Twinkle.Framework.Extensions;
+using Twinkle.Framework.Security.Cryptography;
 
 namespace Twinkle.Framework.Database
 {
@@ -109,7 +109,7 @@ namespace Twinkle.Framework.Database
             //如果连接字符串被加密了 需要解密
             if (encrypt)
             {
-                connectString = DataProtection.RSADecrypt(connectString);
+                connectString = DataCipher.RSADecrypt(connectString);
             }
 
             string providerName = TwinkleContext.Config.GetValue<string>($"ConnectionStrings:{databaseName}:ProviderName");

@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ExceptionServices;
+using System.Text;
 using System.Threading.Tasks;
 
-namespace Twinkle.Framework.Mvc
+namespace Twinkle.Framework.Extensions
 {
     public sealed class TwinkleModelBinderProvider : IModelBinderProvider
     {
@@ -15,7 +17,7 @@ namespace Twinkle.Framework.Mvc
         public IModelBinder GetBinder(ModelBinderProviderContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (new Type[] { typeof(UploadFileArgs), typeof(ClientModel) }.Contains(context.Metadata.ModelType))
+            if (new Type[] { typeof(UploadModel), typeof(ClientModel) }.Contains(context.Metadata.ModelType))
             {
                 return new ParameterModelBinder(context.Metadata.ModelType);
             }
@@ -41,9 +43,9 @@ namespace Twinkle.Framework.Mvc
                     {
                         return BuilderClientModel(bindingContext);
                     }
-                    else if (bindingContext.ModelType == typeof(UploadFileArgs))
+                    else if (bindingContext.ModelType == typeof(UploadModel))
                     {
-                        return BuilderUploadFileArgs(bindingContext);
+                        return BuilderUploadModel(bindingContext);
                     }
                     return Task.CompletedTask;
                 }
@@ -59,29 +61,27 @@ namespace Twinkle.Framework.Mvc
             }
             public Task BuilderClientModel(ModelBindingContext bindingContext)
             {
-                bindingContext.Result = (ModelBindingResult.Success(new ClientModel()));
+                bindingContext.Result = (ModelBindingResult.Success(new ClientModel(bindingContext)));
                 return Task.CompletedTask;
             }
-            public Task BuilderUploadFileArgs(ModelBindingContext bindingContext)
+            public Task BuilderUploadModel(ModelBindingContext bindingContext)
             {
                 ValueProviderResult result = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
                 if (bindingContext.HttpContext.Request.Form.Files.Count > 0)
                 {
-                    JObject _cusobj = new JObject();
+                    JObject cusobj = new JObject();
                     foreach (var key in bindingContext.HttpContext.Request.Form.Keys)
                     {
-                        _cusobj.Add(key, bindingContext.HttpContext.Request.Form[key].ToString());
+                        cusobj.Add(key, bindingContext.HttpContext.Request.Form[key].ToString());
                     }
                     var file = bindingContext.HttpContext.Request.Form.Files[0];
                     var fileName = file.FileName.Substring(file.FileName.LastIndexOf(@"\") + 1);
-                    bindingContext.Result = (ModelBindingResult.Success(new UploadFileArgs
+                    bindingContext.Result = (ModelBindingResult.Success(new UploadModel
                     {
-                        OriginFullName = fileName,
-                        OriginName = fileName.Substring(0, fileName.LastIndexOf(".")),
                         FileName = fileName.Substring(0, fileName.LastIndexOf(".")),
                         Length = file.Length,
                         FileStream = file.OpenReadStream(),
-                        CustomData = _cusobj,
+                        CustomData = cusobj,
                         Extension = fileName?.Substring(fileName.LastIndexOf("."))
                     }));
                     return Task.CompletedTask;

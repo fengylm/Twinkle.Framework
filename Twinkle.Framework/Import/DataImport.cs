@@ -7,10 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Database;
+using Twinkle.Framework.Extensions;
 using Twinkle.Framework.File;
-using Twinkle.Framework.Mvc;
+using Twinkle.Framework.Security.Authorization;
 using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
@@ -96,11 +96,11 @@ namespace Twinkle.Framework.Import
 
         private void SendToClient(ReportArgs args)
         {
-            string token = TwinkleContext.MvcHttpContext.Request.Cookies["access-token"];
+            string token = TwinkleContext.HttpContext.Request.Cookies["access-token"];
 
-            User user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
+            AuthUser user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
 
-            SRService<SRHub>.Instance.Send(user.UserId, new SignalrResponse { Channel = "ServerMessage", Body = args });
+            //SRService<SRHub>.Instance.Send(user.UserId, new SignalrResponse { Channel = "ServerMessage", Body = args });
 
             //SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
         }

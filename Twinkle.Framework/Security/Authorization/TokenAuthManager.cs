@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Twinkle.Framework.Extensions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
@@ -8,10 +7,8 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
-using Twinkle.Framework.Mvc;
 
-namespace Twinkle.Framework.Authorization
+namespace Twinkle.Framework.Security.Authorization
 {
     public class TokenAuthManager
     {
@@ -29,7 +26,7 @@ namespace Twinkle.Framework.Authorization
         /// <param name="UserData">自定义包含用户信息的JSON对象,必须包含小写的uid节点</param>
         /// <param name="Expires">自定义超时时间(分钟),不设置默认获取配置文件中的超时时间</param>
         /// <returns></returns>
-        public string CreateToken(User User, int? Expires = null)
+        public string CreateToken(AuthUser User, int? Expires = null)
         {
             if (User == null)
             {
@@ -65,7 +62,7 @@ namespace Twinkle.Framework.Authorization
         /// 获取UserData的json对象
         /// </summary>
         /// <param name="token">token字符串</param>
-        public User GetUser(string token)
+        public AuthUser GetUser(string token)
         {
             JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
             try
@@ -77,7 +74,7 @@ namespace Twinkle.Framework.Authorization
                 }
                 else
                 {
-                    User user = new User();
+                    AuthUser user = new AuthUser();
                     foreach (Claim claim in Claims)
                     {
                         switch (claim.Type)
@@ -160,8 +157,8 @@ namespace Twinkle.Framework.Authorization
         /// <param name="token">要推送的token</param>
         public void PushToken(string token)
         {
-            TwinkleContext.MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
-            TwinkleContext.MvcHttpContext.Response.Headers["access-token"] = token;
+            TwinkleContext.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
+            TwinkleContext.HttpContext.Response.Headers["access-token"] = token;
         }
 
         /// <summary>
@@ -180,65 +177,7 @@ namespace Twinkle.Framework.Authorization
         /// <param name="token"></param>
         public void DestroyToken(string token)
         {
-            TwinkleContext.Cache.Set(token, "", null, GetTokenExpires(token).AddSeconds(10));
-        }
-    }
-
-    public class AuthConfigurer
-    {
-        public static void Configure(IServiceCollection services)
-        {
-            if (TwinkleContext.Config.GetValue<bool>("Authentication:Enable"))
-            {
-                services.AddAuthentication(options =>
-                {
-                    //认证middleware配置
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(o =>
-                {
-                    //主要是Authentication参数设置
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidIssuer = "Twinkle",
-
-                        ValidateAudience = true,
-                        ValidAudience = "TwinkleClient",
-
-                        ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TwinkleContext.Config.GetValue<string>("Authentication:SecurityKey"))),
-
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                    o.SecurityTokenValidators.Clear();
-                    o.SecurityTokenValidators.Add(new TokenValidator());
-                    o.Events = new JwtBearerEvents
-                    {
-                        OnMessageReceived = delegate (MessageReceivedContext context)
-                        {
-                            if (!context.HttpContext.Request.Path.HasValue || !context.HttpContext.Request.Path.Value.StartsWith("/signalr"))
-                            {
-                                return Task.CompletedTask;
-                            }
-
-
-                            var qsAuthToken = context.Request.Cookies["accessToken"];
-                            if (qsAuthToken == null)
-                            {
-                                return Task.CompletedTask;
-                            }
-
-                            context.Token = qsAuthToken;
-                            return Task.CompletedTask;
-                        }
-                    };
-                });
-
-                services.AddSingleton(typeof(TokenAuthManager), (_) => { return new TokenAuthManager(TwinkleContext.Config.GetValue<string>("Authentication:SecurityKey"), TwinkleContext.Config.GetValue<int>("Authentication:Expires")); });
-            }
+            TwinkleContext.Cache.Set(token, "des-token", null, GetTokenExpires(token).AddSeconds(10));
         }
     }
 }

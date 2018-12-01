@@ -1,30 +1,33 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Twinkle.Framework.Cache;
+using Twinkle.Framework.Security.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Linq;
-using System.Security.Claims;
-using Twinkle.Framework.Authorization;
-using Twinkle.Framework.Cache;
 
-namespace Twinkle.Framework.Mvc
+namespace Twinkle.Framework.Extensions
 {
     public class TwinkleContext
     {
         #region 全局对象注入
         internal static IServiceCollection ServiceCollection { get; set; }
         internal static IHttpContextAccessor HttpContextAccessor => ServiceCollection.BuildServiceProvider().GetService<IHttpContextAccessor>();
-        internal static IHostingEnvironment HostingEnvironment => ServiceCollection.BuildServiceProvider().GetService<IHostingEnvironment>();
         internal static IServiceProvider ServiceProvider => HttpContextAccessor.HttpContext.RequestServices;
+        internal static IHostingEnvironment HostingEnvironment => ServiceCollection.BuildServiceProvider().GetService<IHostingEnvironment>();
         #endregion
+
         #region 获取缓存服务
-        public static ICacheService Cache => ServiceCollection.BuildServiceProvider().GetService<ICacheService>();
-        public static ISession Session => MvcHttpContext.Session;
+        public static ICacheService Cache => GetService<ICacheService>();
+        public static ISession Session => HttpContext.Session;
         #endregion
+
         #region 获取配置服务
-        public static AppConfig Config => ServiceCollection.BuildServiceProvider().GetService<AppConfig>();
+        public static IConfigurationRoot Config => GetService<IConfigurationRoot>();
         #endregion
+
         #region 获取注册服务
         /// <summary>
         /// 获取服务,获取不到返回null
@@ -63,6 +66,7 @@ namespace Twinkle.Framework.Mvc
             return ServiceProvider.GetRequiredService(service);
         }
         #endregion
+
         #region 应用程序信息
         /// <summary>
         /// 应用程序根目录,appsettings.json所在目录
@@ -72,7 +76,7 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 应用程序静态地址根目录,默认就是wwwroot目录,包含在AppRoot下
         /// </summary>
-        public static string WebRoot => HostingEnvironment.WebRootPath;
+        public static string WWWRoot => HostingEnvironment.WebRootPath;
 
         /// <summary>
         /// 应用程序名称
@@ -82,18 +86,19 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 应用程序根Url
         /// </summary>
-        public static string UrlRoot => $"{(string.IsNullOrEmpty(MvcHttpContext.Request.Scheme) ? "" : MvcHttpContext.Request.Scheme + "://")}{MvcHttpContext.Request.Host}{MvcHttpContext.Request.PathBase}";
+        public static string UrlRoot => $"{(string.IsNullOrEmpty(HttpContext.Request.Scheme) ? "" : HttpContext.Request.Scheme + "://")}{HttpContext.Request.Host}{HttpContext.Request.PathBase}";
 
         /// <summary>
         /// 获取Mvc的HttpContext对象
         /// </summary>
-        public static HttpContext MvcHttpContext => HttpContextAccessor.HttpContext;
+        public static HttpContext HttpContext => HttpContextAccessor.HttpContext;
 
         /// <summary>
         /// 获取完整请求路径
         /// </summary>
-        public static string AbsoluteUri => $"{MvcHttpContext.Request.Scheme}://{MvcHttpContext.Request.Host}{MvcHttpContext.Request.PathBase}{MvcHttpContext.Request.Path}{MvcHttpContext.Request.QueryString}";
+        public static string AbsoluteUri => $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}{HttpContext.Request.PathBase}{HttpContext.Request.Path}{HttpContext.Request.QueryString}";
         #endregion
+
         #region 用户登陆验证
         #region 登录/登出
         /// <summary>
@@ -102,12 +107,15 @@ namespace Twinkle.Framework.Mvc
         /// <param name="User">用户对象</param>
         /// <param name="Expires">登陆信息保存时间(分钟) 默认取值为 配置文件的Authentication:Expires</param>
         /// <returns></returns>
-        public static void Login(User User, int? Expires = null)
+        public static void Login(AuthUser User, int? Expires = null)
         {
             var jwt = GetService<TokenAuthManager>();
             string token = jwt.CreateToken(User, Expires);
-            MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
-            MvcHttpContext.Response.Headers["access-token"] = token;
+
+            Session.SetString("AuthUser", JToken.FromObject(User).ToString());
+
+            HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
+            HttpContext.Response.Headers["access-token"] = token;
         }
 
         /// <summary>
@@ -117,6 +125,7 @@ namespace Twinkle.Framework.Mvc
         public static void Logout()
         {
             var jwt = GetService<TokenAuthManager>();
+            Session.Clear();
             jwt.DestroyToken(UserToken);
         }
         #endregion
@@ -124,7 +133,7 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 获取已经登陆的用户数据
         /// </summary>
-        public static object UserData => MvcHttpContext.User.Claims.Where(c => c.Type == TwinkleClaimTypes.UserData).FirstOrDefault()?.Value;
+        public static object UserData => HttpContext.User.Claims.Where(c => c.Type == TwinkleClaimTypes.UserData).FirstOrDefault()?.Value;
 
         /// <summary>
         /// 获取用户token
@@ -133,7 +142,7 @@ namespace Twinkle.Framework.Mvc
         {
             get
             {
-                string author = MvcHttpContext.Request.Headers["Authorization"];
+                string author = HttpContext.Request.Headers["Authorization"];
                 if (!string.IsNullOrEmpty(author))
                 {
                     if (author.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
@@ -147,20 +156,5 @@ namespace Twinkle.Framework.Mvc
         }
         #endregion
         #endregion
-
-    }
-
-    public sealed class AppConfig
-    {
-        private IConfigurationRoot baseConfig;
-        public AppConfig(IConfigurationRoot BaseConfig)
-        {
-            baseConfig = BaseConfig;
-        }
-
-        public T GetValue<T>(string key)
-        {
-            return baseConfig.GetValue<T>($"AppSettings:{key}");
-        }
     }
 }

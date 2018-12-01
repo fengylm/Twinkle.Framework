@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Twinkle.Framework.Utils
+﻿namespace Twinkle.Framework.Utils
 {
     public static class FileHelper
     {

@@ -4,17 +4,17 @@ using System.Threading.Tasks;
 
 namespace Twinkle.Framework.Cache
 {
-    public class CacheService: ICacheService
+    public class CacheService : ICacheService
     {
-        private IDistributedCache cache;
+        private IDistributedCache mCache;
 
         /// <summary>
         /// 实例化缓存对象,推荐通过服务注入实现
         /// </summary>
         /// <param name="Cache"></param>
-        public CacheService(IDistributedCache Cache)
+        public CacheService(IDistributedCache cache)
         {
-            cache = Cache;
+            mCache = cache;
         }
 
         /// <summary>
@@ -31,7 +31,11 @@ namespace Twinkle.Framework.Cache
                 SlidingExpiration = slidingExpiration,
                 AbsoluteExpiration = AbsoluteExpiration
             };
-            cache.SetString(key, value.ToString(), dco);
+            if (value == null || value.ToString() == "")
+            {
+                throw new ArgumentNullException("存储值不能为null或者空字符串");
+            }
+            mCache.SetString(key, value.ToString(), dco);
         }
 
         /// <summary>
@@ -48,7 +52,7 @@ namespace Twinkle.Framework.Cache
                 SlidingExpiration = slidingExpiration,
                 AbsoluteExpiration = AbsoluteExpiration
             };
-            return cache.SetStringAsync(key, value.ToString(), dco);
+            return mCache.SetStringAsync(key, value.ToString(), dco);
         }
 
         /// <summary>
@@ -58,7 +62,7 @@ namespace Twinkle.Framework.Cache
         /// <returns></returns>
         public string Get(string key)
         {
-            return cache.GetString(key);
+            return mCache.GetString(key);
         }
 
         /// <summary>
@@ -68,7 +72,7 @@ namespace Twinkle.Framework.Cache
         /// <returns></returns>
         public Task<string> GetAsync(string key)
         {
-            return  cache.GetStringAsync(key);
+            return mCache.GetStringAsync(key);
         }
 
         /// <summary>
@@ -77,16 +81,16 @@ namespace Twinkle.Framework.Cache
         /// <param name="key">缓存键</param>
         public void Remove(string key)
         {
-            cache.Remove(key);
+            mCache.Remove(key);
         }
 
         /// <summary>
         /// 移除缓存
         /// </summary>
         /// <param name="key">缓存键</param>
-        public  Task RemoveAsync(string key)
+        public Task RemoveAsync(string key)
         {
-            return cache.RemoveAsync(key);
+            return mCache.RemoveAsync(key);
         }
 
         /// <summary>
@@ -95,16 +99,16 @@ namespace Twinkle.Framework.Cache
         /// <param name="key">缓存键</param>
         public void Refresh(string key)
         {
-            cache.Refresh(key);
+            mCache.Refresh(key);
         }
 
         /// <summary>
         /// 刷新缓存,延长过期时间
         /// </summary>
         /// <param name="key">缓存键</param>
-        public  Task RefreshAsync(string key)
+        public Task RefreshAsync(string key)
         {
-            return cache.RefreshAsync(key);
+            return mCache.RefreshAsync(key);
         }
         /// <summary>
         /// 检测缓存是否存在
@@ -113,7 +117,7 @@ namespace Twinkle.Framework.Cache
         /// <returns></returns>
         public bool Exists(string key)
         {
-            return cache.Get(key) != default(byte[]);
+            return mCache.Get(key) != null;
         }
         /// <summary>
         /// 检测缓存是否存在
@@ -122,9 +126,10 @@ namespace Twinkle.Framework.Cache
         /// <returns></returns>
         public Task<bool> ExistsAsync(string key)
         {
-           return Task.Run(async ()=> {
-              return await cache.GetAsync(key) != default(byte[]);
-           });
+            return Task.Run(async () =>
+            {
+                return await mCache.GetAsync(key) != default(byte[]);
+            });
         }
     }
 }

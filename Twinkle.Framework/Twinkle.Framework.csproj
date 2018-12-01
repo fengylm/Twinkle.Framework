@@ -6,12 +6,19 @@
 
   <ItemGroup>
     <Compile Remove="libs\**" />
+    <Compile Remove="Message\**" />
     <EmbeddedResource Remove="libs\**" />
+    <EmbeddedResource Remove="Message\**" />
     <None Remove="libs\**" />
+    <None Remove="Message\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Message\" />
+    <Compile Remove="SignalR\HubArgs.cs" />
+    <Compile Remove="SignalR\HubClient.cs" />
+    <Compile Remove="SignalR\SignalrResponse.cs" />
+    <Compile Remove="SignalR\SRHub.cs" />
+    <Compile Remove="SignalR\SRService.cs" />
   </ItemGroup>
 
   <ItemGroup>

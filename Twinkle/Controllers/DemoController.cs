@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Aspose.Cells;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Twinkle.Framework.Extensions;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Import;
-using Twinkle.Framework.Mvc;
 using Twinkle.Framework.Utils;
 
 namespace Twinkle.Controllers
@@ -62,7 +62,7 @@ namespace Twinkle.Controllers
 
         #region 导入测试
         [AllowAnonymous]
-        public async Task Upload(UploadFileArgs args)
+        public async Task Upload(UploadModel args)
         {
             DataImport si = DataImportFactory.CreateDataImport();
             si.Init(args.FileStream, "testTable", new Mapping[] {
@@ -80,7 +80,8 @@ namespace Twinkle.Controllers
         {
             string code = client.GetString("code");
 
-            return WebHelper.DownLoad(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"));
+            return null;
+            //return WebHelper.DownLoad(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"));
 
         }
         [AllowAnonymous]
