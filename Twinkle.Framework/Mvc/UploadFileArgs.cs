@@ -76,7 +76,7 @@ namespace Twinkle.Framework.Mvc
         public async Task<bool> Save(string savePath = "", bool isWebRoot = false)
         {
 
-            string RootFolder = TwinkleContext.UserConfig.GetValue<string>("Upload:RootFolder");
+            string RootFolder = TwinkleContext.Config.GetValue<string>("Upload:RootFolder");
 
             savePath = Path.Combine(isWebRoot ? TwinkleContext.WebRoot : TwinkleContext.AppRoot, RootFolder, savePath);
             if (!Directory.Exists(savePath))

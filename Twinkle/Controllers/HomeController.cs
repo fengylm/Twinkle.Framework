@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
+using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Cache;
 using Twinkle.Framework.Mvc;
 using Twinkle.Framework.Security;
@@ -28,9 +29,16 @@ namespace Twinkle.Controllers
                 Children = new Router[] {
                     new Router
                     {
-                        cUrl = "/tree",
-                        cPath = "layout/Login",
-                        cTitle = "Tree",
+                        cUrl = "/TRender",
+                        cPath = "demo/TRender",
+                        cTitle = "TRender",
+                        cIcon = "table"
+                    },
+                     new Router
+                    {
+                        cUrl = "/DesignPage",
+                        cPath = "demo/DesignPage",
+                        cTitle = "DesignPage",
                         cIcon = "table"
                     },
                     new Router
@@ -56,7 +64,7 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public JsonResult Login()
         {
-            TwinkleContext.Login(new { uid = "admin", userName = "系统管理员" }, 200);
+            TwinkleContext.Login(new User { UserId = "admin" }, 200);
             return Json(new { status = 0 });
         }
 

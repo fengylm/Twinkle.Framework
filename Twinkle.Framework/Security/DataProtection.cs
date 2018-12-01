@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Twinkle.Framework.Security
 {
-    public class RSA
+    public class DataProtection
     {
-
+        #region 对称加密
         //私钥 通过支付宝签名验签工具生成 
         private static readonly string _privateKey = "MIIEpQIBAAKCAQEAyw1Y6MG4nEVQ4ZaqIxwRwSLNZHltGGceEFW1LPe7exekSqXPdZP6dXUUEUydmpMVdLKGq6aVkamSu31JSbqwSjG38YR8EaCU4+Oq3pAIlxbRyiqYgnlj7gAFw/Pjp/w5VgwF81+okYPahCg7v3WECoRUpFLrdHv9puLgKEigPppsp+wn72pTE0+3qHTeJAzWQj4CvhX7M/U6y51ZMv37VBJiwOkQ16f1RXZDvnB3yjskFfQetqgwP5M+m6GhHpq+dRtG+QrVoGvzorWpkq/VCQgMgnoKI2G1aeVwax+rYpllRyJko/+6P8AkBk4HHuMreGC+SG28nGCyN7hPGVEbNwIDAQABAoIBAQCHYe7VwdQE3XJ/9qSZpC1ySHIJe6xxiM9StNKHmOU3vRudadBY5MEpb1Zh8mNinI7BsAZ6jCdNZ3Kd73rd3cuMrHmoXl0ao6aiCznyCravhld6I8xrseQe24T8kbBIYLMZ3ApbqnwKCY+4bdroXMIdAP4uUdsLX2BP1RT/xuyQz9UdLEi6ImUJAN4ZSgdPHD+p3UPQ6pspiJqunZu2lXxRjsygs0ykQNVyh8X9ushttTZrFA77HSWxzpGyX+0ukJET7VX6sob1u0rFvvETyHGT3mX9V8fnHez57DvDKPi4vtwS4Sod5+ETd0cgv5vSdVHZtxR75DZ6+Cw+OepXh02BAoGBAO91gMWcUyMmSjEecl3yBa4fTWUBLDaYg4mQPMXwBtP2fLcmiPi/YEJD+A+kcem9P80GxlBjSskoXw4DqO+f6E+IZDPi/NeOinxT99GiEvVA1lSDp+N6iS8RVgPg1Sc9e1qQf0k6n4akKDb/lI1YjCFbpYRbDHyxT0HKnG7+thbbAoGBANkUCjyCpQS9Rindq7ICw0wYpYuQNYgfH+12qkl2+7reaPe4v0Ebq2FW/7NFxAakeiToT04wnEvpnzf+Uw9WBxTQylOf/OweDbUrQGGgORrb4SO516aegBr4JJ9ZnO+/Ldr9hQjbWaVXBYm1yeZn2EecQdhr+D+kTau5qD7denXVAoGAFx8JaAtIG8S+tS9za47K7Z0oI/CRDFR9nvLGa3ZZsm3CbQzTfPE9oihd82S1exRC7NESpQBxYCr9wqSn0ztlewh4ZGoub8HbrVWOQDeeDQBNsatksppKVLkfzRAQhNFy77O0FqYKcT24hFb5SQybuzzWJomEEyYruPaPVEhT3LECgYEAwOe1HQbAHFESy9uIW31nDfWND1QMrjVyivR76SMKGorQ3urXUsWC69KDEk26IGkDfk7PQt2h1zf53KluKF+7lTzhv6SZ/z3J0qhn4xmeBYdGMBhTUmbh0pWW/eCFvOu4lTXbhf5fULXfXvwkOlMn+KMcRHXWOsAIocUvhQYOcC0CgYEApwKBQBAJOnwwqoal3ZlkgD3aY9PHcQFxO+N9+d2GFc4xKNomSACP04NkBHU0tj77cHswcv6fUUYM/OpBg8N1/3fYSQIulQZbyPvLCmnSQtS0CSF+jn6yXx5s6KsXrtitguekJr6tL8HjxhJwRW26AOLVwDBeyQySPD8vzrxK9qs=";
 
@@ -20,7 +20,7 @@ namespace Twinkle.Framework.Security
         /// </summary>
         /// <param name="message">要加密的字符串</param>
         /// <returns></returns>
-        public static string Encrypt(string message)
+        public static string RSAEncrypt(string message)
         {
             System.Security.Cryptography.RSA rsa = CreateRsaFromPublicKey(_publicKey);
             var plainTextBytes = Encoding.UTF8.GetBytes(message);
@@ -34,7 +34,7 @@ namespace Twinkle.Framework.Security
         /// <param name="message">要加密的字符串</param>
         /// <param name="publicKey">加密用的公钥</param>
         /// <returns></returns>
-        public static string Encrypt(string message, string publicKey)
+        public static string RSAEncrypt(string message, string publicKey)
         {
             System.Security.Cryptography.RSA rsa = CreateRsaFromPublicKey(publicKey);
             var plainTextBytes = Encoding.UTF8.GetBytes(message);
@@ -49,7 +49,7 @@ namespace Twinkle.Framework.Security
         /// </summary>
         /// <param name="encryptMessage">要解密的字符串</param>
         /// <returns></returns>
-        public static string Decrypt(string encryptMessage)
+        public static string RSADecrypt(string encryptMessage)
         {
             System.Security.Cryptography.RSA rsa = CreateRsaFromPrivateKey(_privateKey);
             var cipherBytes = System.Convert.FromBase64String(encryptMessage);
@@ -63,7 +63,7 @@ namespace Twinkle.Framework.Security
         /// <param name="encryptMessage">要解密的字符串</param>
         /// <param name="privateKey">解密用的私钥</param>
         /// <returns></returns>
-        public static string Decrypt(string encryptMessage, string privateKey)
+        public static string RSADecrypt(string encryptMessage, string privateKey)
         {
             System.Security.Cryptography.RSA rsa = CreateRsaFromPrivateKey(_privateKey);
             var cipherBytes = System.Convert.FromBase64String(encryptMessage);
@@ -323,6 +323,24 @@ namespace Twinkle.Framework.Security
             }
             return true;
         }
+        #endregion
+        #endregion
+
+        #region MD5加密
+        /// <summary>
+        /// MD5加密
+        /// </summary>
+        /// <param name="orginStr">要加密的字符串</param>
+        /// <returns></returns>
+        public static string MD5Encrypt(string orginStr)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                var result = md5.ComputeHash(Encoding.UTF8.GetBytes(orginStr));
+                var strResult = BitConverter.ToString(result);
+                return strResult.Replace("-", "");
+            }
+        } 
         #endregion
     }
 }

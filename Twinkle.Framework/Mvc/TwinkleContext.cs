@@ -3,12 +3,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
+using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Cache;
-using Twinkle.Framework.Security;
 
 namespace Twinkle.Framework.Mvc
 {
@@ -25,8 +23,7 @@ namespace Twinkle.Framework.Mvc
         public static ISession Session => MvcHttpContext.Session;
         #endregion
         #region 获取配置服务
-        public static AppConfig AppConfig => ServiceCollection.BuildServiceProvider().GetService<AppConfig>();
-        public static UserConfig UserConfig => ServiceCollection.BuildServiceProvider().GetService<UserConfig>();
+        public static AppConfig Config => ServiceCollection.BuildServiceProvider().GetService<AppConfig>();
         #endregion
         #region 获取注册服务
         /// <summary>
@@ -102,13 +99,13 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 用户登陆
         /// </summary>
-        /// <param name="userData">用户数据</param>
-        /// <param name="Expires">登陆信息保存时间(分钟) 默认取值为 配置文件的JwtToken:Expires</param>
+        /// <param name="User">用户对象</param>
+        /// <param name="Expires">登陆信息保存时间(分钟) 默认取值为 配置文件的Authentication:Expires</param>
         /// <returns></returns>
-        public static void Login(object UserData, int? Expires = null)
+        public static void Login(User User, int? Expires = null)
         {
-            var jwt = GetService<JWT>();
-            string token = jwt.CreateToken(UserData, Expires);
+            var jwt = GetService<TokenAuthManager>();
+            string token = jwt.CreateToken(User, Expires);
             MvcHttpContext.Response.Headers["Access-Control-Expose-Headers"] = "access-token";
             MvcHttpContext.Response.Headers["access-token"] = token;
         }
@@ -119,7 +116,7 @@ namespace Twinkle.Framework.Mvc
         /// <returns></returns>
         public static void Logout()
         {
-            var jwt = GetService<JWT>();
+            var jwt = GetService<TokenAuthManager>();
             jwt.DestroyToken(UserToken);
         }
         #endregion
@@ -127,7 +124,7 @@ namespace Twinkle.Framework.Mvc
         /// <summary>
         /// 获取已经登陆的用户数据
         /// </summary>
-        public static object UserData => MvcHttpContext.User.Claims.Where(c => c.Type == ClaimTypes.UserData).FirstOrDefault()?.Value;
+        public static object UserData => MvcHttpContext.User.Claims.Where(c => c.Type == TwinkleClaimTypes.UserData).FirstOrDefault()?.Value;
 
         /// <summary>
         /// 获取用户token
@@ -164,20 +161,6 @@ namespace Twinkle.Framework.Mvc
         public T GetValue<T>(string key)
         {
             return baseConfig.GetValue<T>($"AppSettings:{key}");
-        }
-    }
-
-    public sealed class UserConfig
-    {
-        private IConfigurationRoot baseConfig;
-        public UserConfig(IConfigurationRoot BaseConfig)
-        {
-            baseConfig = BaseConfig;
-        }
-
-        public T GetValue<T>(string key)
-        {
-            return baseConfig.GetValue<T>($"UserSettings:{key}");
         }
     }
 }

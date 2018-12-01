@@ -1,16 +1,11 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
-using Twinkle.Framework.Cache;
 using Twinkle.Framework.Mvc;
 
-namespace Twinkle.Framework.Security
+namespace Twinkle.Framework.Authorization
 {
-    public class JWTValidator : JwtSecurityTokenHandler
+    public class TokenValidator : JwtSecurityTokenHandler
     {
         public override ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
         {
@@ -24,7 +19,7 @@ namespace Twinkle.Framework.Security
                 }
                 catch
                 {
-                    //过期或者签名错误的验证会引发异常,这里返回一个啥都不包含的ClaimsPrincipal即可使网页响应为404
+                    //过期或者签名错误的验证会引发异常,这里返回一个啥都不包含的ClaimsPrincipal即可使网页响应为401
                     validatedToken = null;
                     return new ClaimsPrincipal();
                 }

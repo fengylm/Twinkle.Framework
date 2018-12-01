@@ -12,9 +12,9 @@ namespace Twinkle.Framework.Import
         {
             if (string.IsNullOrEmpty(databaseName))
             {
-                databaseName = TwinkleContext.AppConfig.GetValue<string>("ConnectionStrings:DefaultDatabase");
+                databaseName = TwinkleContext.Config.GetValue<string>("ConnectionStrings:DefaultDatabase");
             }
-            string providerName = TwinkleContext.AppConfig.GetValue<string>($"ConnectionStrings:{databaseName}:ProviderName");
+            string providerName = TwinkleContext.Config.GetValue<string>($"ConnectionStrings:{databaseName}:ProviderName");
             switch (providerName)
             {
                 case "System.Data.SqlClient":

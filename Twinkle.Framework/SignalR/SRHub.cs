@@ -1,28 +1,30 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
+using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Mvc;
-using Twinkle.Framework.Security;
 
 namespace Twinkle.Framework.SignalR
 {
-    public class SRHub:Hub
+    [Authorize]
+    public class SRHub : Hub
     {
         public override async Task OnConnectedAsync()
         {
-            if (this.Context.GetHttpContext().Request.Cookies.ContainsKey("access-token"))
+            if (this.Context.GetHttpContext().Request.Cookies.ContainsKey("accessToken"))
             {
-                string token = this.Context.GetHttpContext().Request.Cookies["access-token"];
-                object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
-                if (userData != null&& TwinkleContext.GetService<JWT>().Valid(token))
+                string token = this.Context.GetHttpContext().Request.Cookies["accessToken"];
+                User user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
+                if (user != null && TwinkleContext.GetService<TokenAuthManager>().IsValid(token))
                 {
                     HubClient client = new HubClient
                     {
                         ConnectionId = this.Context.ConnectionId,
-                        AccountId = JToken.Parse(userData.ToString()).Value<string>("uid"),
+                        AccountId = user.UserId
                     };
-                    AddClient((dynamic)this,client);
+                    AddClient((dynamic)this, client);
                 }
             }
             else
@@ -40,7 +42,7 @@ namespace Twinkle.Framework.SignalR
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             string token = this.Context.GetHttpContext().Request.Cookies["access-token"];
-            object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
+            object userData = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
             if (userData != null)
             {
                 RemoveClient((dynamic)this, JToken.Parse(userData.ToString()).Value<string>("uid"));

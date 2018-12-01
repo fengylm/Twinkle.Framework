@@ -1,20 +1,15 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.DataProtection;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Text;
+using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Cache;
-using Twinkle.Framework.Security;
 using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Mvc
@@ -38,29 +33,30 @@ namespace Twinkle.Framework.Mvc
             services.AddHttpContextAccessor();
             TwinkleContext.ServiceCollection = services;
             #endregion
+
             #region 添加配置信息服务
             IConfigurationRoot Config = new ConfigurationBuilder().SetBasePath(TwinkleContext.AppRoot).AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
             services.AddSingleton(typeof(AppConfig), (_) => { return new AppConfig(Config); });
-            services.AddSingleton(typeof(UserConfig), (_) => { return new UserConfig(Config); });
             #endregion
+
             #region 添加缓存服务
-            switch (TwinkleContext.AppConfig.GetValue<string>("CacheStrategy"))
+            switch (TwinkleContext.Config.GetValue<string>("CacheStrategy"))
             {
                 case "Redis":
                     services.AddDistributedRedisCache(options =>
                     {
-                        options.Configuration = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries)[0];
-                        options.InstanceName = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerName");
+                        options.Configuration = TwinkleContext.Config.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries)[0];
+                        options.InstanceName = TwinkleContext.Config.GetValue<string>("Redis:ServerName");
                     });
 
                     services.AddSingleton(typeof(RedisService), (_) =>
                     {
                         return new RedisService(new RedisConfig
                         {
-                            Password = TwinkleContext.AppConfig.GetValue<string>("Redis:Password"),
-                            SentinelHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:SentinelHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
-                            ServerHosts = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
-                            ServerName = TwinkleContext.AppConfig.GetValue<string>("Redis:ServerName")
+                            Password = TwinkleContext.Config.GetValue<string>("Redis:Password"),
+                            SentinelHosts = TwinkleContext.Config.GetValue<string>("Redis:SentinelHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                            ServerHosts = TwinkleContext.Config.GetValue<string>("Redis:ServerHosts").Split(',', StringSplitOptions.RemoveEmptyEntries),
+                            ServerName = TwinkleContext.Config.GetValue<string>("Redis:ServerName")
                         });
                     });
                     break;
@@ -71,43 +67,20 @@ namespace Twinkle.Framework.Mvc
             services.AddSingleton(typeof(ICacheService), typeof(CacheService));
 
             #endregion
+
             #region 添加数据签名保护服务
-            services.AddDataProtection(opts =>
-            {
-                opts.ApplicationDiscriminator = TwinkleContext.AppConfig.GetValue<string>("AppID");
-            }).PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(TwinkleContext.AppRoot, $"{TwinkleContext.AppConfig.GetValue<string>("AppID")}_keys")));
+
+            //services.AddDataProtection(opts =>
+            //{
+            //    opts.ApplicationDiscriminator = TwinkleContext.Config.GetValue<string>("AppID");
+            //}).PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(TwinkleContext.AppRoot, $"{TwinkleContext.Config.GetValue<string>("AppID")}_keys")));
 
             #endregion
+
             #region 添加身份认证服务
-            if (TwinkleContext.AppConfig.GetValue<bool>("JwtToken:Enable"))
-            {
-                services.AddAuthentication(options =>
-                {
-                    //认证middleware配置
-                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-                })
-                .AddJwtBearer(o =>
-                {
-                    //主要是jwttoken参数设置
-                    o.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = "Twinkle",
-                        ValidAudience = "TwinkleClient",
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(TwinkleContext.AppConfig.GetValue<string>("JwtToken:SecurityKey"))),
-                        ValidateIssuerSigningKey = true,
-                        ValidateLifetime = true,
-                        ClockSkew = TimeSpan.Zero
-                    };
-                    o.SecurityTokenValidators.Clear();
-                    o.SecurityTokenValidators.Add(new JWTValidator());
-                });
-
-
-
-                services.AddSingleton(typeof(JWT), (_) => { return new JWT(TwinkleContext.AppConfig.GetValue<string>("JwtToken:SecurityKey"), TwinkleContext.AppConfig.GetValue<int>("JwtToken:Expires")); });
-            }
+            AuthConfigurer.Configure(services);
             #endregion
+
             #region 添加Mvc服务
             services.AddMvc(options =>
             {
@@ -128,11 +101,13 @@ namespace Twinkle.Framework.Mvc
                 op.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
             });
             #endregion
+
             #region 添加Session服务
             services.AddSession();
             #endregion
+
             #region 添加跨域支持服务
-            if (TwinkleContext.AppConfig.GetValue<bool>("EnableCors"))
+            if (TwinkleContext.Config.GetValue<bool>("EnableCors"))
             {
                 services.AddCors(options =>
                 {
@@ -146,6 +121,7 @@ namespace Twinkle.Framework.Mvc
                 });
             }
             #endregion
+
             #region 添加SignalR服务
             services.AddSignalR(op =>
                 {
@@ -163,10 +139,12 @@ namespace Twinkle.Framework.Mvc
                 config.MultipartBodyLengthLimit = int.MaxValue;
             });
             #endregion
+
             #region 设置字符集
             //设置字符集
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             #endregion
+
             return services;
         }
 
@@ -181,26 +159,30 @@ namespace Twinkle.Framework.Mvc
         {
             #region 启用跨域
             // 允许跨域 放在所有需要跨域的use的最上面,否则就是一个老大的坑
-            if (TwinkleContext.AppConfig.GetValue<bool>("EnableCors"))
+            if (TwinkleContext.Config.GetValue<bool>("EnableCors"))
             {
                 app.UseCors("any");
             }
             #endregion
+
             #region 启用身份认证
-            if (TwinkleContext.AppConfig.GetValue<bool>("JwtToken:Enable"))
+            if (TwinkleContext.Config.GetValue<bool>("Authentication:Enable"))
             {
                 app.UseAuthentication();
             }
             #endregion
+
             #region 启用静态文件目录 默认是wwwroot
             app.UseStaticFiles(new StaticFileOptions
             {
                 ServeUnknownFileTypes = true
             });
             #endregion
+
             #region 启用Session
             app.UseSession();
             #endregion
+
             #region SignalR代理配置
 
             if (configureHubs?.Count > 0)
@@ -212,13 +194,15 @@ namespace Twinkle.Framework.Mvc
             }
             app.UseSignalR(route =>
             {
-                route.MapHub<SRHub>("/TwinkleHub");
+                route.MapHub<SRHub>("/signalr");
             });
 
             #endregion
+
             #region 启用中间件
             app.UseMiddleware<TwinkleMiddleware>();
             #endregion
+
             #region 路由配置
             app.UseMvc(configureRoutes);
             #endregion

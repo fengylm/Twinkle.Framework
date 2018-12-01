@@ -67,7 +67,7 @@ namespace Twinkle.Framework.Database
         {
             if (string.IsNullOrEmpty(databaseName))
             {
-                databaseName = TwinkleContext.AppConfig.GetValue<string>("ConnectionStrings:DefaultDatabase");
+                databaseName = TwinkleContext.Config.GetValue<string>("ConnectionStrings:DefaultDatabase");
             }
             CreateConnection(databaseName);
         }
@@ -102,17 +102,17 @@ namespace Twinkle.Framework.Database
         /// <returns></returns>
         public IDbConnection CreateConnection(string databaseName)
         {
-            bool encrypt = TwinkleContext.AppConfig.GetValue<bool>($"ConnectionStrings:{databaseName}:Encrypt");
+            bool encrypt = TwinkleContext.Config.GetValue<bool>($"ConnectionStrings:{databaseName}:Encrypt");
 
-            string connectString = TwinkleContext.AppConfig.GetValue<string>($"ConnectionStrings:{databaseName}:ConnectString");
+            string connectString = TwinkleContext.Config.GetValue<string>($"ConnectionStrings:{databaseName}:ConnectString");
 
             //如果连接字符串被加密了 需要解密
             if (encrypt)
             {
-                connectString = RSA.Decrypt(connectString);
+                connectString = DataProtection.RSADecrypt(connectString);
             }
 
-            string providerName = TwinkleContext.AppConfig.GetValue<string>($"ConnectionStrings:{databaseName}:ProviderName");
+            string providerName = TwinkleContext.Config.GetValue<string>($"ConnectionStrings:{databaseName}:ProviderName");
 
             IDbConnection connection = null;
             switch (providerName)

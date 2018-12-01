@@ -4,7 +4,7 @@ using System.Data;
 using System.IO;
 using System.Text;
 
-namespace Twinkle.Framework.Util
+namespace Twinkle.Framework.Utils
 {
     public static class ObjectConvert
     {

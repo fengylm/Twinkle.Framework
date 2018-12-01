@@ -1,6 +1,4 @@
-﻿using Aspose.Cells;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,10 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Twinkle.Framework.Authorization;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Mvc;
-using Twinkle.Framework.Security;
 using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Import
@@ -100,9 +98,9 @@ namespace Twinkle.Framework.Import
         {
             string token = TwinkleContext.MvcHttpContext.Request.Cookies["access-token"];
 
-            object userData = TwinkleContext.GetService<JWT>().GetUserData(token);
+            User user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
 
-            SRService<SRHub>.Instance.Send(JToken.Parse(userData.ToString()).Value<string>("uid"), new SignalrResponse { Channel = "ServerMessage", Body = args });
+            SRService<SRHub>.Instance.Send(user.UserId, new SignalrResponse { Channel = "ServerMessage", Body = args });
 
             //SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
         }

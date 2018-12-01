@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Twinkle.Framework.Security;
+using Twinkle.Framework.Authorization;
 
 namespace Twinkle.Framework.Mvc
 {
@@ -33,8 +31,8 @@ namespace Twinkle.Framework.Mvc
             {
                 if (author.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
                 {
-                    var jwt = TwinkleContext.GetService<JWT>();
-                    return jwt.Valid(author.Substring(7));
+                    var jwt = TwinkleContext.GetService<TokenAuthManager>();
+                    return jwt.IsValid(author.Substring(7));
                 }
                 return true;
             }

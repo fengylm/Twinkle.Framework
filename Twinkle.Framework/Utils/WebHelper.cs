@@ -6,7 +6,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using Twinkle.Framework.Mvc;
 
-namespace Twinkle.Framework.Util
+namespace Twinkle.Framework.Utils
 {
     public static class WebHelper
     {
