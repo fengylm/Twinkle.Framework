@@ -23,8 +23,8 @@ namespace Twinkle.Framework.SignalR
             var client = mOnlineClientManager.GetByConnectionId(Context.ConnectionId);
             if (client == null)
             {
-                //client = CreateClientForCurrentConnection();
-                //mOnlineClientManager.Add(client);
+                client = CreateClientForCurrentConnection();
+                mOnlineClientManager.Add(client);
             }
         }
 

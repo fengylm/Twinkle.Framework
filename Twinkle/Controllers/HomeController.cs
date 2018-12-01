@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.Security.Authorization;
 using Twinkle.Models;
@@ -12,6 +13,22 @@ namespace Twinkle.Controllers
     [Authorize]
     public class HomeController : Controller
     {
+
+        [AllowAnonymous]
+        public IActionResult Index()
+        {
+            string apiPath = $"window.apiPath='{TwinkleContext.UrlRoot}';";
+            string printService = $"window.printService='http://www.comstarsoft.com/PrintService/report.aspx';";
+
+            ViewBag.Content = System.IO.File.ReadAllText(Path.Combine(TwinkleContext.WWWRoot, "index.html"))
+                .Replace("/css/", "css/")
+                .Replace("/js/", "js/")
+                .Replace("// config injected", apiPath + printService);
+
+            return View();
+
+        }
+
         public JsonResult GetRouters()
         {
             List<Router> lstRouter = new List<Router>();

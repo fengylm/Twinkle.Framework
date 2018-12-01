@@ -32,12 +32,21 @@ namespace Twinkle
             //    app.UseDeveloperExceptionPage();
             //}
 
-            app.UseTwinkle(config,routes =>
+            app.UseTwinkle(config, routes =>
             {
                 routes.MapRoute(
-                       name: "default",
-                       template: "{controller}/{action}",
-                       defaults: new { controller = "Home", action = "Index" });
+                    name: "default",
+                    template: "{controller}/{action}",
+                    defaults: new { controller = "Home", action = "Index" });
+
+                routes.MapRoute(
+                       name: "areas",
+                       template: "{area}/{controller}/{action}"
+                     );
+
+                routes.MapSpaFallbackRoute(
+                   name: "spa-fallback",
+                   defaults: new { controller = "Home", action = "Index" });
             });
         }
     }
