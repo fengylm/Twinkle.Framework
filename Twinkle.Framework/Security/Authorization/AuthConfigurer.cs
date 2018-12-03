@@ -57,7 +57,7 @@ namespace Twinkle.Framework.Security.Authorization
             }
 
 
-            var qsAuthToken = context.Request.Cookies["accessToken"];
+            var qsAuthToken = context.Request.Query["accessToken"].ToString();
             if (qsAuthToken == null)
             {
                 return Task.CompletedTask;

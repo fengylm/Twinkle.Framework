@@ -5,6 +5,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Twinkle.Framework.Extensions;
 
 namespace Twinkle.Framework.SignalR
 {
@@ -23,7 +24,7 @@ namespace Twinkle.Framework.SignalR
             var client = mOnlineClientManager.GetByConnectionId(Context.ConnectionId);
             if (client == null)
             {
-                client = CreateClientForCurrentConnection();
+                client = CreateClientForCurrentConnection(Context.GetHttpContext().Request.Query["accessToken"].ToString());
                 mOnlineClientManager.Add(client);
             }
         }
@@ -31,9 +32,9 @@ namespace Twinkle.Framework.SignalR
 
 
 
-        private IOnlineClient CreateClientForCurrentConnection()
+        private IOnlineClient CreateClientForCurrentConnection(string token)
         {
-            AuthUser user = JToken.Parse(Context.GetHttpContext().Session.GetString("AuthUser")).ToObject<AuthUser>();
+            AuthUser user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
 
             return new OnlineClient
             {

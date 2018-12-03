@@ -99,6 +99,7 @@ namespace Twinkle.Framework.Extensions
 
             #region 添加SignalR服务
             services.AddSingleton(typeof(IOnlineClientManager), typeof(OnlineClientManager));
+            services.AddSingleton(typeof(IRealTimeNotifier), typeof(SignalRRealTimeNotifier));
 
             services.AddSignalR(options =>
             {

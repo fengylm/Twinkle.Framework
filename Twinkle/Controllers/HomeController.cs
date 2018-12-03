@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.Security.Authorization;
+using Twinkle.Framework.SignalR;
 using Twinkle.Models;
 
 namespace Twinkle.Controllers
@@ -78,11 +79,20 @@ namespace Twinkle.Controllers
             TwinkleContext.Login(new AuthUser { UserId = "admin" }, 200);
             return Json(new { status = 0 });
         }
-
+        [AllowAnonymous]
         public JsonResult Logout()
         {
             TwinkleContext.Logout();
             return Json(new { status = 0 });
+        }
+        [AllowAnonymous]
+        public void SendNotify()
+        {
+            IRealTimeNotifier rtf= TwinkleContext.GetService<IRealTimeNotifier>();
+
+            rtf.SendNotificationsAsync(new UserNotification[] {
+                new UserNotification{ UserId="admin",Data=new NotifyData{ Type="test",Data=new { key="key",num=2 }  } }
+            });
         }
 
         public JsonResult GetData(ClientModel client)
