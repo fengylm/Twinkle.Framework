@@ -22,8 +22,7 @@ namespace Twinkle.Controllers
             string printService = $"window.printService='http://www.comstarsoft.com/PrintService/report.aspx';";
 
             ViewBag.Content = System.IO.File.ReadAllText(Path.Combine(TwinkleContext.WWWRoot, "index.html"))
-                .Replace("/css/", "css/")
-                .Replace("/js/", "js/")
+                .Replace("/static", "static")
                 .Replace("// config injected", apiPath + printService);
 
             return View();
@@ -88,7 +87,7 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public void SendNotify()
         {
-            IRealTimeNotifier rtf= TwinkleContext.GetService<IRealTimeNotifier>();
+            IRealTimeNotifier rtf = TwinkleContext.GetService<IRealTimeNotifier>();
 
             rtf.SendNotificationsAsync(new UserNotification[] {
                 new UserNotification{ UserId="admin",Data=new NotifyData{ Type="test",Data=new { key="key",num=2 }  } }

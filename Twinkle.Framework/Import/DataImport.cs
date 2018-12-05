@@ -96,13 +96,25 @@ namespace Twinkle.Framework.Import
 
         private void SendToClient(ReportArgs args)
         {
-            string token = TwinkleContext.HttpContext.Request.Cookies["access-token"];
+            string token = TwinkleContext.UserToken;
 
             AuthUser user = TwinkleContext.GetService<TokenAuthManager>().GetUser(token);
 
-            //SRService<SRHub>.Instance.Send(user.UserId, new SignalrResponse { Channel = "ServerMessage", Body = args });
-
-            //SRService<SRHub>.Instance.SendAll(new SignalrResponse { Channel = "ServerMessage", Body = args });
+            IRealTimeNotifier rtf = TwinkleContext.GetService<IRealTimeNotifier>();
+            rtf.SendNotificationsAsync(new UserNotification[] {
+                new UserNotification{
+                    TenantId =user.TenantId,
+                    UserId =user.UserId,
+                    Data =new NotifyData{
+                        Type="upload",
+                        Data=new {
+                            uploadId=TwinkleContext.HttpContext.Request.Form["uploadId"].ToString(),//有待测试验证
+                            message=args.Message,
+                            status=args.Status
+                        }
+                    }
+                }
+            });
         }
 
         #endregion
