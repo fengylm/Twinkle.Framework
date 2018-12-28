@@ -63,7 +63,7 @@ namespace Twinkle.Framework.Import
         /// <param name="ex"></param>
         public void ErrorReport(ReportArgs args)
         {
-            args.Status = 2;
+            args.Status = 3;
             Rollback();
             args.Message = $"<strong style='color:red'>{ args.Message}</strong>";
             SendToClient(args);
@@ -74,9 +74,9 @@ namespace Twinkle.Framework.Import
         /// 普通消息报告,不影响操作流程
         /// </summary>
         /// <param name="args"></param>
-        public void InfoReport(ReportArgs args)
+        public void InfoReport(ReportArgs args, int status = 0)
         {
-            args.Status = 0;
+            args.Status = status;
             SendToClient(args);
             StatusReport?.Invoke(args);
         }
@@ -87,14 +87,14 @@ namespace Twinkle.Framework.Import
         /// <param name="args"></param>
         public void WarningReport(ReportArgs args)
         {
-            args.Status = 1;
+            args.Status = 2;
             WarningCount++;
             args.Message = $"<strong style='color:red'>{ args.Message}</strong>";
             SendToClient(args);
             StatusReport?.Invoke(args);
         }
 
-        private void SendToClient(ReportArgs args)
+        private void SendToClient(ReportArgs args, int status = 0)
         {
             string token = TwinkleContext.UserToken;
 
@@ -106,7 +106,7 @@ namespace Twinkle.Framework.Import
                     TenantId =user.TenantId,
                     UserId =user.UserId,
                     Data =new NotifyData{
-                        Type="upload",
+                        Channel="signalr.reveive",
                         Data=new {
                             uploadId=TwinkleContext.HttpContext.Request.Form["uploadId"].ToString(),//有待测试验证
                             message=args.Message,
@@ -275,33 +275,36 @@ namespace Twinkle.Framework.Import
                     SubmitDatabase(source, config, out temptable);
 
                     InfoReport(new ReportArgs { Message = "提交成功,执行冲突策略校验..." });
-                    switch (config.Strategy)
+                    if (config.Strategy == Strategy.None || this.Keys.Count == 0)
                     {
-                        case Strategy.None:
-                            {
-                                CommonStrategy(temptable, config, out int affectCount);
-                                InfoReport(new ReportArgs { Message = $"启用默认策略,导入{affectCount}条数据" });
-                            }
-                            break;
-                        case Strategy.Abort:
-                            {
-                                AbortStrategy(temptable, config, out int affectCount);
-                                InfoReport(new ReportArgs { Message = $"启用终止策略,导入{affectCount}条数据" });
-                            }
-                            break;
-                        case Strategy.Cover:
-                            {
-                                CoverStrategy(temptable, config, out int affectCount);
-                                InfoReport(new ReportArgs { Message = $"启用覆盖策略,导入{source.Rows.Count}条数据,覆盖{affectCount}条历史数据." });
-                            }
-                            break;
-                        case Strategy.Update:
-                            {
-                                UpdateStrategy(temptable, config, out int affectCount);
-                                InfoReport(new ReportArgs { Message = $"启用更新策略,导入{source.Rows.Count - affectCount}条数据,更新{affectCount}条历史数据." });
-                            }
-                            break;
+                        CommonStrategy(temptable, config, out int affectCount);
+                        InfoReport(new ReportArgs { Message = $"启用默认策略,导入{affectCount}条数据" }, 1);
                     }
+                    else
+                    {
+                        switch (config.Strategy)
+                        {
+                            case Strategy.Abort:
+                                {
+                                    AbortStrategy(temptable, config, out int affectCount);
+                                    InfoReport(new ReportArgs { Message = $"启用终止策略,导入{affectCount}条数据" }, 1);
+                                }
+                                break;
+                            case Strategy.Cover:
+                                {
+                                    CoverStrategy(temptable, config, out int affectCount);
+                                    InfoReport(new ReportArgs { Message = $"启用覆盖策略,导入{source.Rows.Count}条数据,覆盖{affectCount}条历史数据." }, 1);
+                                }
+                                break;
+                            case Strategy.Update:
+                                {
+                                    UpdateStrategy(temptable, config, out int affectCount);
+                                    InfoReport(new ReportArgs { Message = $"启用更新策略,导入{source.Rows.Count - affectCount}条数据,更新{affectCount}条历史数据." }, 1);
+                                }
+                                break;
+                        }
+                    }
+
                     Commit();
                 }
                 catch (Exception ex)

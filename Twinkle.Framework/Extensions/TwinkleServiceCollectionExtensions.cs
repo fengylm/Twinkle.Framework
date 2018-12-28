@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Twinkle.Framework.SignalR;
+using Twinkle.Framework.Database;
 
 namespace Twinkle.Framework.Extensions
 {
@@ -123,6 +124,10 @@ namespace Twinkle.Framework.Extensions
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             #endregion
 
+            #region 添加数据库操作
+            services.AddTransient<DatabaseManager>(); 
+            #endregion
+
             return services;
         }
 
@@ -170,7 +175,7 @@ namespace Twinkle.Framework.Extensions
             #endregion
 
             #region 启用中间件
-            //app.UseMiddleware<TwinkleMiddleware>();
+            app.UseMiddleware<TwinkleMiddleware>();
             #endregion
 
             #region 路由配置

@@ -2,28 +2,26 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
-    "iis": {
-      "applicationUrl": "http://localhost/ELTwinkle",
-      "sslPort": 0
-    },
     "iisExpress": {
-      "applicationUrl": "http://localhost:2240",
-      "sslPort": 0
+      "applicationUrl": "http://localhost:5028",
+      "sslPort": 44320
     }
   },
   "profiles": {
     "IIS Express": {
-      "commandName": "IIS",
+      "commandName": "IISExpress",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "Twinkle": {
-      "commandName": "IIS",
+    "webTest": {
+      "commandName": "Project",
+      "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:2240"
+      "applicationUrl": "https://localhost:5001;http://localhost:5000"
     }
   }
 }

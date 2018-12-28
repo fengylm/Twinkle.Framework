@@ -11,8 +11,8 @@ namespace Twinkle.Framework.Security.Cryptography
     public static class DataCipher
     {
         #region RSA加密
-        public static string PrivateKey { private get; set; } = "MIIEpQIBAAKCAQEAyw1Y6MG4nEVQ4ZaqIxwRwSLNZHltGGceEFW1LPe7exekSqXPdZP6dXUUEUydmpMVdLKGq6aVkamSu31JSbqwSjG38YR8EaCU4+Oq3pAIlxbRyiqYgnlj7gAFw/Pjp/w5VgwF81+okYPahCg7v3WECoRUpFLrdHv9puLgKEigPppsp+wn72pTE0+3qHTeJAzWQj4CvhX7M/U6y51ZMv37VBJiwOkQ16f1RXZDvnB3yjskFfQetqgwP5M+m6GhHpq+dRtG+QrVoGvzorWpkq/VCQgMgnoKI2G1aeVwax+rYpllRyJko/+6P8AkBk4HHuMreGC+SG28nGCyN7hPGVEbNwIDAQABAoIBAQCHYe7VwdQE3XJ/9qSZpC1ySHIJe6xxiM9StNKHmOU3vRudadBY5MEpb1Zh8mNinI7BsAZ6jCdNZ3Kd73rd3cuMrHmoXl0ao6aiCznyCravhld6I8xrseQe24T8kbBIYLMZ3ApbqnwKCY+4bdroXMIdAP4uUdsLX2BP1RT/xuyQz9UdLEi6ImUJAN4ZSgdPHD+p3UPQ6pspiJqunZu2lXxRjsygs0ykQNVyh8X9ushttTZrFA77HSWxzpGyX+0ukJET7VX6sob1u0rFvvETyHGT3mX9V8fnHez57DvDKPi4vtwS4Sod5+ETd0cgv5vSdVHZtxR75DZ6+Cw+OepXh02BAoGBAO91gMWcUyMmSjEecl3yBa4fTWUBLDaYg4mQPMXwBtP2fLcmiPi/YEJD+A+kcem9P80GxlBjSskoXw4DqO+f6E+IZDPi/NeOinxT99GiEvVA1lSDp+N6iS8RVgPg1Sc9e1qQf0k6n4akKDb/lI1YjCFbpYRbDHyxT0HKnG7+thbbAoGBANkUCjyCpQS9Rindq7ICw0wYpYuQNYgfH+12qkl2+7reaPe4v0Ebq2FW/7NFxAakeiToT04wnEvpnzf+Uw9WBxTQylOf/OweDbUrQGGgORrb4SO516aegBr4JJ9ZnO+/Ldr9hQjbWaVXBYm1yeZn2EecQdhr+D+kTau5qD7denXVAoGAFx8JaAtIG8S+tS9za47K7Z0oI/CRDFR9nvLGa3ZZsm3CbQzTfPE9oihd82S1exRC7NESpQBxYCr9wqSn0ztlewh4ZGoub8HbrVWOQDeeDQBNsatksppKVLkfzRAQhNFy77O0FqYKcT24hFb5SQybuzzWJomEEyYruPaPVEhT3LECgYEAwOe1HQbAHFESy9uIW31nDfWND1QMrjVyivR76SMKGorQ3urXUsWC69KDEk26IGkDfk7PQt2h1zf53KluKF+7lTzhv6SZ/z3J0qhn4xmeBYdGMBhTUmbh0pWW/eCFvOu4lTXbhf5fULXfXvwkOlMn+KMcRHXWOsAIocUvhQYOcC0CgYEApwKBQBAJOnwwqoal3ZlkgD3aY9PHcQFxO+N9+d2GFc4xKNomSACP04NkBHU0tj77cHswcv6fUUYM/OpBg8N1/3fYSQIulQZbyPvLCmnSQtS0CSF+jn6yXx5s6KsXrtitguekJr6tL8HjxhJwRW26AOLVwDBeyQySPD8vzrxK9qs=";
-        public static string PublicKey { private get; set; } = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyw1Y6MG4nEVQ4ZaqIxwRwSLNZHltGGceEFW1LPe7exekSqXPdZP6dXUUEUydmpMVdLKGq6aVkamSu31JSbqwSjG38YR8EaCU4+Oq3pAIlxbRyiqYgnlj7gAFw/Pjp/w5VgwF81+okYPahCg7v3WECoRUpFLrdHv9puLgKEigPppsp+wn72pTE0+3qHTeJAzWQj4CvhX7M/U6y51ZMv37VBJiwOkQ16f1RXZDvnB3yjskFfQetqgwP5M+m6GhHpq+dRtG+QrVoGvzorWpkq/VCQgMgnoKI2G1aeVwax+rYpllRyJko/+6P8AkBk4HHuMreGC+SG28nGCyN7hPGVEbNwIDAQAB";
+        private static string PrivateKey = "MIIEpQIBAAKCAQEAyw1Y6MG4nEVQ4ZaqIxwRwSLNZHltGGceEFW1LPe7exekSqXPdZP6dXUUEUydmpMVdLKGq6aVkamSu31JSbqwSjG38YR8EaCU4+Oq3pAIlxbRyiqYgnlj7gAFw/Pjp/w5VgwF81+okYPahCg7v3WECoRUpFLrdHv9puLgKEigPppsp+wn72pTE0+3qHTeJAzWQj4CvhX7M/U6y51ZMv37VBJiwOkQ16f1RXZDvnB3yjskFfQetqgwP5M+m6GhHpq+dRtG+QrVoGvzorWpkq/VCQgMgnoKI2G1aeVwax+rYpllRyJko/+6P8AkBk4HHuMreGC+SG28nGCyN7hPGVEbNwIDAQABAoIBAQCHYe7VwdQE3XJ/9qSZpC1ySHIJe6xxiM9StNKHmOU3vRudadBY5MEpb1Zh8mNinI7BsAZ6jCdNZ3Kd73rd3cuMrHmoXl0ao6aiCznyCravhld6I8xrseQe24T8kbBIYLMZ3ApbqnwKCY+4bdroXMIdAP4uUdsLX2BP1RT/xuyQz9UdLEi6ImUJAN4ZSgdPHD+p3UPQ6pspiJqunZu2lXxRjsygs0ykQNVyh8X9ushttTZrFA77HSWxzpGyX+0ukJET7VX6sob1u0rFvvETyHGT3mX9V8fnHez57DvDKPi4vtwS4Sod5+ETd0cgv5vSdVHZtxR75DZ6+Cw+OepXh02BAoGBAO91gMWcUyMmSjEecl3yBa4fTWUBLDaYg4mQPMXwBtP2fLcmiPi/YEJD+A+kcem9P80GxlBjSskoXw4DqO+f6E+IZDPi/NeOinxT99GiEvVA1lSDp+N6iS8RVgPg1Sc9e1qQf0k6n4akKDb/lI1YjCFbpYRbDHyxT0HKnG7+thbbAoGBANkUCjyCpQS9Rindq7ICw0wYpYuQNYgfH+12qkl2+7reaPe4v0Ebq2FW/7NFxAakeiToT04wnEvpnzf+Uw9WBxTQylOf/OweDbUrQGGgORrb4SO516aegBr4JJ9ZnO+/Ldr9hQjbWaVXBYm1yeZn2EecQdhr+D+kTau5qD7denXVAoGAFx8JaAtIG8S+tS9za47K7Z0oI/CRDFR9nvLGa3ZZsm3CbQzTfPE9oihd82S1exRC7NESpQBxYCr9wqSn0ztlewh4ZGoub8HbrVWOQDeeDQBNsatksppKVLkfzRAQhNFy77O0FqYKcT24hFb5SQybuzzWJomEEyYruPaPVEhT3LECgYEAwOe1HQbAHFESy9uIW31nDfWND1QMrjVyivR76SMKGorQ3urXUsWC69KDEk26IGkDfk7PQt2h1zf53KluKF+7lTzhv6SZ/z3J0qhn4xmeBYdGMBhTUmbh0pWW/eCFvOu4lTXbhf5fULXfXvwkOlMn+KMcRHXWOsAIocUvhQYOcC0CgYEApwKBQBAJOnwwqoal3ZlkgD3aY9PHcQFxO+N9+d2GFc4xKNomSACP04NkBHU0tj77cHswcv6fUUYM/OpBg8N1/3fYSQIulQZbyPvLCmnSQtS0CSF+jn6yXx5s6KsXrtitguekJr6tL8HjxhJwRW26AOLVwDBeyQySPD8vzrxK9qs=";
+        private static string PublicKey = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAyw1Y6MG4nEVQ4ZaqIxwRwSLNZHltGGceEFW1LPe7exekSqXPdZP6dXUUEUydmpMVdLKGq6aVkamSu31JSbqwSjG38YR8EaCU4+Oq3pAIlxbRyiqYgnlj7gAFw/Pjp/w5VgwF81+okYPahCg7v3WECoRUpFLrdHv9puLgKEigPppsp+wn72pTE0+3qHTeJAzWQj4CvhX7M/U6y51ZMv37VBJiwOkQ16f1RXZDvnB3yjskFfQetqgwP5M+m6GhHpq+dRtG+QrVoGvzorWpkq/VCQgMgnoKI2G1aeVwax+rYpllRyJko/+6P8AkBk4HHuMreGC+SG28nGCyN7hPGVEbNwIDAQAB";
 
 
         #region 非对称加密
@@ -20,10 +20,11 @@ namespace Twinkle.Framework.Security.Cryptography
         /// 非对称加密
         /// </summary>
         /// <param name="message">要加密的字符串</param>
+        /// <param name="publicKey">自定义加密公钥</param>
         /// <returns></returns>
-        public static string RSAEncrypt(string message)
+        public static string RSAEncrypt(string message, string publicKey = null)
         {
-            RSA rsa = CreateRsaFromPublicKey(PublicKey);
+            RSA rsa = CreateRsaFromPublicKey(publicKey ?? PublicKey);
             var plainTextBytes = Encoding.UTF8.GetBytes(message);
             var cipherBytes = rsa.Encrypt(plainTextBytes, RSAEncryptionPadding.Pkcs1);
             return Convert.ToBase64String(cipherBytes);
@@ -36,10 +37,11 @@ namespace Twinkle.Framework.Security.Cryptography
         /// 非对称解密
         /// </summary>
         /// <param name="encryptMessage">要解密的字符串</param>
+        /// <param name="privateKey">自定义解密私钥</param>
         /// <returns></returns>
-        public static string RSADecrypt(string encryptMessage)
+        public static string RSADecrypt(string encryptMessage, string privateKey = null)
         {
-            RSA rsa = CreateRsaFromPrivateKey(PrivateKey);
+            RSA rsa = CreateRsaFromPrivateKey(privateKey ?? PrivateKey);
             byte[] cipherBytes = System.Convert.FromBase64String(encryptMessage);
             byte[] plainTextBytes = rsa.Decrypt(cipherBytes, RSAEncryptionPadding.Pkcs1);
             return Encoding.UTF8.GetString(plainTextBytes);
@@ -51,10 +53,11 @@ namespace Twinkle.Framework.Security.Cryptography
         /// 签名
         /// </summary>
         /// <param name="data">要签名的内容</param>
+        /// <param name="privateKey">自定义签名私钥</param>
         /// <returns></returns>
-        public static string Sign(string data)
+        public static string Sign(string data, string privateKey = null)
         {
-            RSA rsa = CreateRsaFromPrivateKey(PrivateKey);
+            RSA rsa = CreateRsaFromPrivateKey(privateKey ?? PrivateKey);
 
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
@@ -70,13 +73,14 @@ namespace Twinkle.Framework.Security.Cryptography
         /// </summary>
         /// <param name="data">原始数据</param>
         /// <param name="sign">签名后的数据</param>
+        /// <param name="publicKey">自定义验签公钥</param>
         /// <returns></returns>
-        public static bool Verify(string data, string sign)
+        public static bool Verify(string data, string sign, string publicKey = null)
         {
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
             byte[] signBytes = Convert.FromBase64String(sign);
 
-            RSA rsa = CreateRsaFromPublicKey(PublicKey);
+            RSA rsa = CreateRsaFromPublicKey(publicKey ?? PublicKey);
 
             var verify = rsa.VerifyData(dataBytes, signBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1);
 

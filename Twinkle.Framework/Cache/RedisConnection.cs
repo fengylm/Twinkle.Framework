@@ -106,7 +106,6 @@ namespace Twinkle.Framework.Cache
                 ConnectionMultiplexer.Connect(sentinelConfig);
             }
             #endregion
-
             return connect;
         }
         private static ConnectionMultiplexer GetMessageConnection()

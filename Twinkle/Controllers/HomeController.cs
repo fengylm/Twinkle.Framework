@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using Twinkle.Framework.Extensions;
@@ -11,8 +10,7 @@ using Twinkle.Models;
 
 namespace Twinkle.Controllers
 {
-    [Authorize]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
 
         [AllowAnonymous]
@@ -34,39 +32,34 @@ namespace Twinkle.Controllers
             List<Router> lstRouter = new List<Router>();
             lstRouter.Add(new Router
             {
-                cUrl = "/example",
-                cTitle = "Example1",
-                cIcon = "table",
+                Url = "/Demo",
+                Title = "Demo",
+                Icon = "table",
                 Children = new Router[] {
                     new Router
                     {
-                        cUrl = "/TRender",
-                        cPath = "demo/TRender",
-                        cTitle = "TRender",
-                        cIcon = "table"
+                        Url = "/Examples",
+                        Path = "demo/Examples",
+                        Title = "Examples",
+                        Icon = "table"
                     },
-                     new Router
-                    {
-                        cUrl = "/DesignPage",
-                        cPath = "demo/DesignPage",
-                        cTitle = "DesignPage",
-                        cIcon = "table"
-                    },
-                    new Router
-                    {
-                        cUrl = "/table",
-                        cPath = "demo/ttable",
-                        cTitle = "Table",
-                        cIcon = "table"
-                    }
                 }
             });
             lstRouter.Add(new Router
             {
-                cUrl = "/example1",
-                cTitle = "Example2",
-                cPath = "layout/Login",
-                cIcon = "table"
+                Url = "/Examples1",
+                Title = "(Examples)独立页面",
+                Path = "demo/Examples",
+                Icon = "table",
+                IsSingle = true,
+            });
+            lstRouter.Add(new Router
+            {
+                Url = "/Examples2",
+                Title = "(Examples)内置页面",
+                Path = "demo/Examples",
+                Icon = "table",
+                IsSingle = false,
             });
 
             return Json(lstRouter);
@@ -75,8 +68,14 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public JsonResult Login()
         {
+            int? tenantId = null;
             TwinkleContext.Login(new AuthUser { UserId = "admin" }, 200);
-            return Json(new { status = 0 });
+            return Json(new
+            {
+                status = 0,
+                userId = "admin",
+                tenantId,
+            });
         }
         [AllowAnonymous]
         public JsonResult Logout()
@@ -90,37 +89,13 @@ namespace Twinkle.Controllers
             IRealTimeNotifier rtf = TwinkleContext.GetService<IRealTimeNotifier>();
 
             rtf.SendNotificationsAsync(new UserNotification[] {
-                new UserNotification{ UserId="admin",Data=new NotifyData{ Type="test",Data=new { key="key",num=2 }  } }
+                new UserNotification{ UserId="admin",Data=new NotifyData{ Channel="test",Data=new { key="key",num=2 }  } }
             });
         }
 
         public JsonResult GetData(ClientModel client)
         {
-            int? start = client.GetInt("_start");
-            int? limit = client.GetInt("_limit");
-            int? id = client.GetInt("id");
-
-            List<object> lst = new List<object>();
-            lst.Add(new
-            {
-                datetime = DateTime.Now.ToString(),
-                date = DateTime.Now.ToString("yyyy-MM-dd"),
-                time = DateTime.Now.ToString(),
-                number = 19.22,
-                select = "1",
-                @string = "上海市普陀区金沙江路 1518 弄"
-            });
-            lst.Add(new
-            {
-                datetime = DateTime.Now.ToString(),
-                date = DateTime.Now.ToString("yyyy-MM-dd"),
-                time = DateTime.Now.ToString(),
-                number = 12.01,
-                select = "0",
-                @string = "上海市普陀区金沙江路 1518 弄"
-            });
-
-            return Json(new { total = 2, data = lst });
+            return this.Paging("SELECT * FROM TWTABLE", "id", client);
         }
 
         [AllowAnonymous]

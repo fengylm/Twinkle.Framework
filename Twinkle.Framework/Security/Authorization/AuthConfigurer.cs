@@ -51,10 +51,10 @@ namespace Twinkle.Framework.Security.Authorization
 
         private static Task MessageReceived(MessageReceivedContext context)
         {
-            if (!context.HttpContext.Request.Path.HasValue || !context.HttpContext.Request.Path.Value.StartsWith("/signalr"))
-            {
-                return Task.CompletedTask;
-            }
+            //if (!context.HttpContext.Request.Path.HasValue || !context.HttpContext.Request.Path.Value.StartsWith("/signalr"))
+            //{
+            //    return Task.CompletedTask;
+            //}
 
 
             var qsAuthToken = context.Request.Query["accessToken"].ToString();

@@ -151,7 +151,11 @@ namespace Twinkle.Framework.Extensions
                     }
                     return "";
                 }
-                return "";
+                else
+                {
+                    author = HttpContext.Request.Query["accessToken"].ToString();
+                }
+                return author;
             }
         }
         #endregion

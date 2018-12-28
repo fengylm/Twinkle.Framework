@@ -1,0 +1,39 @@
+﻿{
+  "Strategy": "Update",
+  "TableName": "twtable",
+  "Mappings": [
+    {
+      "DBColumn": "cDesc",
+      "FileColumn": "描述",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": false
+    },
+    {
+      "DBColumn": "nValue",
+      "FileColumn": "取值",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Number",
+      "Key": false,
+      "AllowNull": false
+    },
+    {
+      "DBColumn": "dModifyDate",
+      "FileColumn": "修改日期",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Date",
+      "Key": false
+    },
+    {
+      "DBColumn": "iType",
+      "FileColumn": "类型",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Number",
+      "Key": false
+    }
+  ]
+}
