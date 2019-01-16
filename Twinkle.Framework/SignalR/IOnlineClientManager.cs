@@ -25,7 +25,7 @@ namespace Twinkle.Framework.SignalR
         /// <param name="UserId"></param>
         /// <param name="TenantId"></param>
         /// <returns></returns>
-        IOnlineClient GetClientById(string UserId, int? TenantId);
+        IOnlineClient GetClientById(string UserId, string TenantId);
 
         /// <summary>
         /// 获取所有客户端
@@ -39,6 +39,6 @@ namespace Twinkle.Framework.SignalR
         /// <param name="UserId"></param>
         /// <param name="TenantId"></param>
         /// <returns></returns>
-        IReadOnlyList<IOnlineClient> GetAllByUserId(string UserId, int? TenantId);
+        IReadOnlyList<IOnlineClient> GetAllByUserId(string UserId, string TenantId);
     }
 }

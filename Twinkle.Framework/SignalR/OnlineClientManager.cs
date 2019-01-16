@@ -77,7 +77,7 @@ namespace Twinkle.Framework.SignalR
         /// <param name="UserId"></param>
         /// <param name="TenantId"></param>
         /// <returns></returns>
-        public IOnlineClient GetClientById(string UserId, int? TenantId)
+        public IOnlineClient GetClientById(string UserId, string TenantId)
         {
             lock (SyncObj)
             {
@@ -93,7 +93,7 @@ namespace Twinkle.Framework.SignalR
         /// <param name="UserId"></param>
         /// <param name="TenantId"></param>
         /// <returns></returns>
-        public IReadOnlyList<IOnlineClient> GetAllByUserId(string UserId, int? TenantId)
+        public IReadOnlyList<IOnlineClient> GetAllByUserId(string UserId, string TenantId)
         {
             return GetAllClients()
                 .Where(c => (c.UserId == UserId && c.TenantId == TenantId)).ToImmutableList();

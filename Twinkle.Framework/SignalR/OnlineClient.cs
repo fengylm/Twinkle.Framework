@@ -4,6 +4,6 @@
     {
         public string ConnectionId { get; set; }
         public string UserId { get; set; }
-        public int? TenantId { get; set; }
+        public string TenantId { get; set; }
     }
 }

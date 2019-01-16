@@ -1,9 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Aspose.Cells;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Data;
+using System.IO;
 using System.Text;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.Extensions;
+using Twinkle.Framework.Utils;
 
 namespace Twinkle.Controllers
 {
@@ -40,16 +44,22 @@ namespace Twinkle.Controllers
 
             int? start = clientModel.GetInt("_start");
             int? limit = clientModel.GetInt("_limit");
+            string sort = clientModel.GetString("_sort");
+            if (!string.IsNullOrEmpty(sort))
+            {
+                orderBy = sort;
+            }
 
             int bodyIndex = strSQL.IndexOf("select", StringComparison.CurrentCultureIgnoreCase) + "select".Length;
 
-            int dataCount = (db ?? Db).ExecuteInteger($"SELECT COUNT(1) FROM ({strSQL}) totalTable", parameters);
+            int total = (db ?? Db).ExecuteInteger($"SELECT COUNT(1) FROM ({strSQL}) totalTable", parameters);
 
-            if (dataCount == 0)
+            if (total == 0)
             {
                 return Json(new
                 {
                     total = 0,
+                    start = 0,
                     data = new object[] { }
                 });
             }
@@ -57,9 +67,9 @@ namespace Twinkle.Controllers
             if (start != null && limit != null)
             {
                 // 处理在改变数据后 当前页码大于实际页码 导致查询无数据的问题
-                if (dataCount < (start * limit) + 1)
+                if (total < (start * limit) + 1)
                 {
-                    start = dataCount == limit && start > 0 ? start - 1 : Convert.ToInt32(Math.Floor(dataCount / limit.Value * 1m));
+                    start = total == start * limit && start > 0 ? start - 1 : Convert.ToInt32(Math.Floor(total / limit.Value * 1m));
                 }
             }
 
@@ -72,12 +82,28 @@ namespace Twinkle.Controllers
 
             return Json(new
             {
-                total = dataCount,
+                total,
+                start,
                 data = (db ?? Db).ExecuteEntities<dynamic>(pagingBuild.ToString(), parameters)
             });
         }
 
-
+        /// <summary>
+        /// 写入响应流,生成下载文件
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult FileDownload(DataTable soure, string fileName)
+        {
+            string ext = FileHelper.FileExtension(fileName);
+            SaveFormat saveFormat = (SaveFormat)Enum.Parse(typeof(SaveFormat), ext, true);
+            using (Workbook wb = new Workbook())
+            {
+                wb.Worksheets[0].Cells.ImportData(soure, 0, 0, new ImportTableOptions { });
+                MemoryStream stream = new MemoryStream();
+                wb.Save(stream, saveFormat);
+                return WebHelper.DownLoad(stream, fileName);
+            }
+        }
 
     }
 }

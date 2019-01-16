@@ -17,6 +17,7 @@ namespace Twinkle.Framework.Utils
         {
             TwinkleContext.HttpContext.Response.Headers["Access-Control-Expose-Headers"] = "filename";
             TwinkleContext.HttpContext.Response.Headers["filename"] = UrlEncoder.Default.Encode(fileName);
+            stream.Seek(0, SeekOrigin.Begin);
             return new FileStreamResult(stream, "application/octet-stream");
         }
 

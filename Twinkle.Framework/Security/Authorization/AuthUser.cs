@@ -2,7 +2,7 @@
 {
     public class AuthUser
     {
-        public int? TenantId { get; set; }
+        public string TenantId { get; set; }
 
         public string UserId { get; set; }
 

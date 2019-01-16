@@ -1,5 +1,4 @@
-﻿using Twinkle.Framework.Extensions;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Linq;
 using System;
@@ -7,6 +6,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using Twinkle.Framework.Extensions;
 
 namespace Twinkle.Framework.Security.Authorization
 {
@@ -83,10 +83,7 @@ namespace Twinkle.Framework.Security.Authorization
                                 user.UserId = claim.Value;
                                 continue;
                             case TwinkleClaimTypes.TenantId:
-                                if (!string.IsNullOrEmpty(claim.Value))
-                                {
-                                    user.TenantId = Convert.ToInt32(claim.Value);
-                                }
+                                user.TenantId = claim.Value;
                                 continue;
                             case TwinkleClaimTypes.GroupId:
                                 user.GroupId = claim.Value;

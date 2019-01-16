@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Twinkle.Framework.SignalR
+﻿namespace Twinkle.Framework.SignalR
 {
     public interface IOnlineClient
     {
         string ConnectionId { get; set; }
         string UserId { get; set; }
-        int? TenantId { get; set; }
+        string TenantId { get; set; }
     }
 }

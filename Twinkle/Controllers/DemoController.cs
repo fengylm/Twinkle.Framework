@@ -1,21 +1,17 @@
-﻿using System;
+﻿using Aspose.Cells;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Text;
-using System.Text.Encodings.Web;
 using System.Threading.Tasks;
-using Aspose.Cells;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Twinkle.Framework.Database;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.File;
 using Twinkle.Framework.Import;
-using Twinkle.Framework.Utils;
 
 namespace Twinkle.Controllers
 {
-    public class DemoController : Controller
+    public class DemoController : BaseController
     {
         #region excel操作
         public JsonResult CreateExcel()
@@ -71,15 +67,26 @@ namespace Twinkle.Controllers
 
         public IActionResult downLoad(ClientModel client)
         {
-            return WebHelper.DownLoad(Path.Combine(TwinkleContext.AppRoot, "excelDemo", "导入测试.xlsx"));
-
+            return FileDownload(Db.ExecuteDataTable("SELECT * FROM TWTABLE"), "导出.xlsx");
         }
 
-        public JsonResult GetData()
+        public JsonResult GetData(ClientModel client)
         {
-            dynamic data = TwinkleContext.GetRequiredService<DatabaseManager>().ExecuteEntities<dynamic>("SELECT * FROM testTable");
+            return this.Paging("SELECT * FROM TWTABLE", "id", client);
+        }
 
-            return Json(new { total = 100, data });
+        public JsonResult Update(ClientModel client)
+        {
+            var data = client.GetEntity<dynamic>("data");
+
+            return Json(new { status = 0 });
+        }
+
+        public JsonResult Delete(ClientModel client)
+        {
+            var data = client.GetEntity<List<dynamic>>("dels");
+
+            return Json(new { status = 0 });
         }
     }
 }

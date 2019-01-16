@@ -16,7 +16,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Base\Controllers\" />
     <Folder Include="wwwroot\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Views\Shared\Error.cshtml" />
+    <None Include="Views\Shared\_Layout.cshtml" />
   </ItemGroup>
 
   <ItemGroup>
