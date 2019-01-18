@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 using System.IO;
 using Twinkle.Framework.Extensions;
 
@@ -20,7 +22,13 @@ namespace Twinkle
                 .Build();
             services.AddSingleton(typeof(IConfigurationRoot), config);
             #endregion
-            services.AddTwinkle(config);
+
+            #region 添加全局异常处理
+            List<IFilterMetadata> lstFilter = new List<IFilterMetadata>();
+            lstFilter.Add(new CustomExceptionFilter()); 
+            #endregion
+
+            services.AddTwinkle(config, lstFilter);
 
         }
 
@@ -31,6 +39,7 @@ namespace Twinkle
             {
                 app.UseDeveloperExceptionPage();
             }
+
             app.UseExceptionHandler("/Home/Error");
 
             app.UseTwinkle(config, routes =>

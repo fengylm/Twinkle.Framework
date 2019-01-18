@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.Extensions;
+using Twinkle.Framework.Security.Authorization;
 using Twinkle.Framework.Utils;
 
 namespace Twinkle.Controllers
@@ -15,10 +16,13 @@ namespace Twinkle.Controllers
     public class BaseController : Controller
     {
         protected DatabaseManager Db = null;
+        protected AuthUser Auth = null;
 
         public BaseController()
         {
             Db = TwinkleContext.GetRequiredService<DatabaseManager>();
+            Auth = TwinkleContext.GetService<TokenAuthManager>().GetUser(TwinkleContext.UserToken);
+            Auth.TenantId = "0000000000";// 暂时没有多租户模块 给予一个默认租户编码
         }
 
         /// <summary>
