@@ -5,12 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="log4file\**" />
     <Compile Remove="twinkle_keys\**" />
     <Compile Remove="UploadFiles\**" />
+    <Content Remove="log4file\**" />
     <Content Remove="twinkle_keys\**" />
     <Content Remove="UploadFiles\**" />
+    <EmbeddedResource Remove="log4file\**" />
     <EmbeddedResource Remove="twinkle_keys\**" />
     <EmbeddedResource Remove="UploadFiles\**" />
+    <None Remove="log4file\**" />
     <None Remove="twinkle_keys\**" />
     <None Remove="UploadFiles\**" />
   </ItemGroup>
@@ -26,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0" />
@@ -42,6 +47,12 @@
     <Reference Include="Aspose.Words">
       <HintPath>..\Twinkle.Framework\libs\Aspose.Words.dll</HintPath>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>

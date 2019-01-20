@@ -1,6 +1,8 @@
 ﻿using Aspose.Cells;
+using log4net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Data;
 using System.IO;
@@ -17,12 +19,20 @@ namespace Twinkle.Controllers
     {
         protected DatabaseManager Db = null;
         protected AuthUser Auth = null;
+        protected ILogger Logger = null;
 
         public BaseController()
         {
             Db = TwinkleContext.GetRequiredService<DatabaseManager>();
-            Auth = TwinkleContext.GetService<TokenAuthManager>().GetUser(TwinkleContext.UserToken);
+            Auth = TwinkleContext.GetService<TokenAuthManager>().GetUser(TwinkleContext.UserToken) ?? new AuthUser() ;
             Auth.TenantId = "0000000000";// 暂时没有多租户模块 给予一个默认租户编码
+
+            Logger = GetLogger((dynamic)this);
+        }
+
+        private ILogger GetLogger<T>(T controller)
+        {
+            return TwinkleContext.GetService<ILogger<T>>();
         }
 
         /// <summary>

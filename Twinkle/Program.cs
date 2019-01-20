@@ -19,6 +19,11 @@ namespace Twinkle
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging((hostingContext, logging)=> {
+                    logging.AddFilter("System", LogLevel.Error);
+                    logging.AddFilter("Microsoft", LogLevel.Error);
+                    logging.AddLog4Net(new Log4NetProviderOptions() { });
+                })
                 .UseStartup<Startup>();
     }
 }

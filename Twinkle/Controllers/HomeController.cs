@@ -32,7 +32,7 @@ namespace Twinkle.Controllers
         [AllowAnonymous]
         public JsonResult Login()
         {
-            int? tenantId = null;
+            string tenantId = this.Auth.TenantId;
             TwinkleContext.Login(new AuthUser { UserId = "admin" }, 200);
             return Json(new
             {
