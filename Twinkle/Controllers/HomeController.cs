@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.Security.Authorization;
+using Twinkle.Framework.Security.Cryptography;
 using Twinkle.Framework.SignalR;
 using Twinkle.Models;
 
@@ -30,16 +31,111 @@ namespace Twinkle.Controllers
         }
 
         [AllowAnonymous]
-        public JsonResult Login()
+        public JsonResult Login(ClientModel client)
         {
-            string tenantId = this.Auth.TenantId;
-            TwinkleContext.Login(new AuthUser { UserId = "admin" }, 200);
-            return Json(new
+            string UserId = client.GetString("UserId");
+            string Password = client.GetString("Password");
+
+            string tenantId = this.Auth.TenantId;// 后期 tenantId 一般会是从登陆界面带过来
+
+            Sys_User user = Db.ExecuteEntity<Sys_User>("SELECT * FROM Sys_User WHERE UserId=@UserId and TenantId=@TenantId", new { UserId, TenantId = tenantId });
+
+            if (user == null)
             {
-                status = 0,
-                userId = "admin",
-                tenantId,
-            });
+                return Json(new
+                {
+                    status = 1,
+                    msg = "账号不存在."
+                });
+            }
+
+            user.cLoginIP = this.Request.HttpContext.Connection.RemoteIpAddress.ToString().Replace("::1", "127.0.0.1");
+
+
+            if (user.cPassword != DataCipher.MD5Encrypt(user.UserId + user.cNonceStr + Password))
+            {
+
+                if (user.dUnlockDate > DateTime.Now)
+                {
+                    return Json(new
+                    {
+                        status = 1,
+                        msg = "账户已经被锁定,请稍后再试或联系管理员."
+                    });
+                }
+
+                if ((DateTime.Now - (user.dLoginDate ?? DateTime.MinValue)).TotalMinutes > 30)
+                {
+                    user.nFailedCount = 0;
+                }
+
+                user.nFailedCount = (user.nFailedCount ?? 0) + 1;
+
+                if (user.nFailedCount == 5)
+                {
+                    user.dUnlockDate = DateTime.Now.AddMinutes(20);
+                }
+                else
+                {
+                    user.dUnlockDate = null;
+                }
+
+                Db.ExecuteNonQuery("UPDATE Sys_User SET cLoginIP = @cLoginIP,dLoginDate = GETDATE(),nFailedCount =@nFailedCount,dUnlockDate=@dUnlockDate WHERE UserId=@UserId AND TenantId=@TenantId", user);
+
+                if (user.nFailedCount == 5)
+                {
+                    return Json(new
+                    {
+                        status = 1,
+                        msg = "由于多次密码错误,账号已经被锁定,请20分钟后重试."
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 1,
+                        msg = $"账号或密码错误,无法登陆,还可尝试 {5 - user.nFailedCount} 次."
+                    });
+                }
+            }
+            else
+            {
+                if (user.dUnlockDate > DateTime.Now)
+                {
+                    return Json(new
+                    {
+                        status = 1,
+                        msg = "账户已经被锁定,请稍后再试或联系管理员."
+                    });
+                }
+
+                if (user.iStatus == 0)
+                {
+                    return Json(new
+                    {
+                        status = 1,
+                        msg = "账户已经被停用,请联系管理员."
+                    });
+                }
+
+                user.nFailedCount = 0;
+                user.dUnlockDate = null;
+
+                Db.ExecuteNonQuery("UPDATE Sys_User SET cLoginIP = @cLoginIP,dLoginDate = GETDATE(),nFailedCount =@nFailedCount WHERE UserId=@UserId AND TenantId=@TenantId", user);
+
+                TwinkleContext.Login(new AuthUser { UserId = UserId, TenantId = tenantId });
+                return Json(new
+                {
+                    status = 0,
+                    userId = UserId,
+                    tenantId,
+                });
+            }
+
+
+
+
         }
 
         [AllowAnonymous]

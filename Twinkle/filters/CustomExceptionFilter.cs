@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using Twinkle.Framework.Database;
 using Twinkle.Framework.Extensions;
 
 namespace Twinkle.filters
@@ -11,10 +12,16 @@ namespace Twinkle.filters
         public void OnException(ExceptionContext context)
         {
             var logger = TwinkleContext.GetService<ILogger<CustomExceptionFilter>>();
+            DatabaseManager Db = TwinkleContext.GetRequiredService<DatabaseManager>();
 
             if (context.ExceptionHandled == false)
             {
                 string msg = context.Exception.Message;
+
+                if (Db.Transaction != null)
+                {
+                    Db.Rollback();
+                }
 
                 logger.LogError($"{string.Join("/", context.RouteData.Values.Values)} - {msg}");
 

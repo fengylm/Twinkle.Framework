@@ -125,7 +125,7 @@ namespace Twinkle.Framework.Extensions
             #endregion
 
             #region 添加数据库操作
-            services.AddTransient<DatabaseManager>(); 
+            services.AddScoped<DatabaseManager>(); 
             #endregion
 
             return services;

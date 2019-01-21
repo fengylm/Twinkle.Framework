@@ -102,6 +102,26 @@ namespace Twinkle.Framework.Extensions
 
         }
 
+        /// <summary>
+        /// 获取数组对象
+        /// </summary>
+        /// <typeparam name="T">数组类型</typeparam>
+        /// <param name="key">参数名,多阶参数用冒号分割</param>
+        /// <returns></returns>
+        public T[] GetArray<T>(string key)
+        {
+            object value = GetValue(key);
+            if (value != null)
+            {
+                return JToken.Parse(GetValue(key)?.ToString()).ToObject<T[]>();
+            }
+            else
+            {
+                return default(T[]);
+            }
+
+        }
+
         private object GetValue(string key)
         {
             List<string> keys = key.Split(":", StringSplitOptions.RemoveEmptyEntries).ToList();
