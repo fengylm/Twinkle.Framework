@@ -1,7 +1,6 @@
-﻿using Twinkle.Framework.Cache;
-using Twinkle.Framework.Security.Authorization;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
@@ -9,8 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Twinkle.Framework.SignalR;
+using Twinkle.Framework.Cache;
 using Twinkle.Framework.Database;
+using Twinkle.Framework.Security.Authorization;
+using Twinkle.Framework.SignalR;
 
 namespace Twinkle.Framework.Extensions
 {
@@ -125,7 +126,7 @@ namespace Twinkle.Framework.Extensions
             #endregion
 
             #region 添加数据库操作
-            services.AddScoped<DatabaseManager>(); 
+            services.AddScoped<DatabaseManager>();
             #endregion
 
             return services;
@@ -180,6 +181,13 @@ namespace Twinkle.Framework.Extensions
 
             #region 路由配置
             app.UseMvc(configureRoutes);
+            #endregion
+
+            #region .net core 支持nginx
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedProto
+            });
             #endregion
 
             return app;

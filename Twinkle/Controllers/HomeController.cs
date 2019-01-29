@@ -162,14 +162,24 @@ namespace Twinkle.Controllers
             {
                 Url = "/setting",
                 Title = "设置",
-                Icon = "table",
                 Children = new Router[] {
+                     new Router
+                    {
+                        Url = "/module",
+                        Path = "base/Module",
+                        Title = "功能模块",
+                    },
                     new Router
                     {
                         Url = "/user",
                         Path = "base/User",
                         Title = "用户信息",
-                        Icon = "table"
+                    },
+                    new Router
+                    {
+                        Url = "/role",
+                        Path = "base/Role",
+                        Title = "权限信息",
                     },
                 }
             });
@@ -177,14 +187,12 @@ namespace Twinkle.Controllers
             {
                 Url = "/Demo",
                 Title = "Demo",
-                Icon = "table",
                 Children = new Router[] {
                     new Router
                     {
                         Url = "/Examples",
                         Path = "demo/Examples",
                         Title = "Examples",
-                        Icon = "table"
                     },
                 }
             });
@@ -193,7 +201,6 @@ namespace Twinkle.Controllers
                 Url = "/Examples1",
                 Title = "(Examples)独立页面",
                 Path = "demo/Examples",
-                Icon = "table",
                 IsSingle = true,
             });
             lstRouter.Add(new Router
@@ -201,7 +208,6 @@ namespace Twinkle.Controllers
                 Url = "/Test",
                 Title = "(Test)内置页面",
                 Path = "demo/Test",
-                Icon = "table",
                 IsSingle = false,
             });
 
