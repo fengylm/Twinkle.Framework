@@ -103,6 +103,15 @@ namespace Twinkle.Framework.Extensions
         }
 
         /// <summary>
+        /// 获取全部输入参数的json对象
+        /// </summary>
+        /// <returns></returns>
+        public JObject GetClientParams()
+        {
+            return ClientParams;
+        }
+
+        /// <summary>
         /// 获取数组对象
         /// </summary>
         /// <typeparam name="T">数组类型</typeparam>

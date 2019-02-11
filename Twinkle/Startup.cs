@@ -37,7 +37,8 @@ namespace Twinkle
 
             #region 添加全局异常处理
             List<IFilterMetadata> lstFilter = new List<IFilterMetadata>();
-            lstFilter.Add(new CustomExceptionFilter());
+            lstFilter.Add(new OperationFilter());
+            lstFilter.Add(new ExceptionFilter());
             #endregion
 
             services.AddTwinkle(config, lstFilter);

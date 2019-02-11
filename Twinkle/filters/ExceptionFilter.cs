@@ -7,11 +7,11 @@ using Twinkle.Framework.Extensions;
 
 namespace Twinkle.filters
 {
-    public class CustomExceptionFilter : IExceptionFilter, IFilterMetadata
+    public class ExceptionFilter : IExceptionFilter, IFilterMetadata
     {
         public void OnException(ExceptionContext context)
         {
-            var logger = TwinkleContext.GetService<ILogger<CustomExceptionFilter>>();
+            var logger = TwinkleContext.GetService<ILogger<ExceptionFilter>>();
             DatabaseManager Db = TwinkleContext.GetRequiredService<DatabaseManager>();
 
             if (context.ExceptionHandled == false)

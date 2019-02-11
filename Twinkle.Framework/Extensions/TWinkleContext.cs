@@ -133,7 +133,7 @@ namespace Twinkle.Framework.Extensions
         /// <summary>
         /// 获取已经登陆的用户数据
         /// </summary>
-        public static object UserData => HttpContext.User.Claims.Where(c => c.Type == TwinkleClaimTypes.UserData).FirstOrDefault()?.Value;
+        public static AuthUser User => TwinkleContext.GetService<TokenAuthManager>().GetUser(UserToken);
 
         /// <summary>
         /// 获取用户token
