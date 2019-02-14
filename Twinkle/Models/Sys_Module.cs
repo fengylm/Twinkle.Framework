@@ -16,7 +16,7 @@
 
         public string cIcon { get; set; }
 
-        public int? cPID { get; set; }
+        public int? nPID { get; set; }
 
         [ModelProperty(OnlyInsert = true)]
         public int? iStatus { get; set; }
