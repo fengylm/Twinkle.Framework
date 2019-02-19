@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Twinkle.Controllers;
 using Twinkle.Framework.Extensions;
 using Twinkle.Models;
@@ -11,6 +14,66 @@ namespace Twinkle.Areas.Base.Controllers
         {
             return this.Paging("SELECT * FROM Sys_Role", "ID", client);
         }
+
+        #region 分配权限Module加载
+        public JsonResult GetModuleData(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("ID");
+            Node node = new Node
+            {
+                label = "系统菜单",
+                expand = true,
+                id = 0
+            };
+
+            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"select T.*,ISNULL(T1.nRoleID,0) iHasRole from Sys_Module T 
+                                                                               LEFT JOIN Sys_RoleForModule T1 ON T.cCode=T1.cModuleCode 
+                                                                               AND T1.TenantId=@TenantId and T1.nRoleID=@nRoleID
+                                                                               ORDER BY T.ID", new { TenantId = Auth.TenantId, nRoleID });
+
+            NodeBuilder(node, listModule);
+
+            List<Node> nodes = new List<Node>();
+            nodes.Add(node);
+
+            return Json(new
+            {
+                nodes,
+                ids = listModule.Where(m => m.iHasRole > 0).Select(m => m.ID).ToArray()
+            });
+
+
+        }
+
+        public void NodeBuilder(Node pNode, List<Sys_Module> list)
+        {
+            foreach (var item in list.Where(p => { return p.nPID == pNode.id; }))
+            {
+                Node subNode = new Node();
+                subNode.label = item.cTitle;
+                subNode.expand = true;
+                subNode.id = item.ID;
+                subNode.cCode = item.cCode;
+                subNode.@checked = item.iHasRole > 0;
+                if (pNode.children == null)
+                {
+                    pNode.children = new List<Node>();
+                }
+                pNode.children.Add(subNode);
+
+                NodeBuilder(subNode, list);
+            }
+            if (pNode.children == null)
+            {
+                pNode.leaf = true;
+            }
+            else
+            {
+                pNode.@checked = false;
+                pNode.leaf = false;
+            }
+        }
+        #endregion
 
 
         public JsonResult Save(ClientModel client)
@@ -80,5 +143,126 @@ namespace Twinkle.Areas.Base.Controllers
                 return 0;
             }
         }
+
+        public JsonResult ModuleRoleSet(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("roleID");
+            string[] moduleCodes = clientModel.GetArray<string>("moduleCodeArr");
+            Db.BeginTransaction();
+
+            try
+            {
+                string strSQL = "DELETE Sys_RoleForModule WHERE TenantId=@nCompanyID and nRoleID=@nRoleID";
+                Db.ExecuteNonQuery(strSQL, new { nCompanyID = Auth.TenantId, nRoleID });
+                if (moduleCodes != null && moduleCodes.Length > 0)
+                {
+                    List<object> insertEntity = new List<object>();
+                    foreach (var item in moduleCodes)
+                    {
+                        insertEntity.Add(new
+                        {
+                            nCompanyID = Auth.TenantId,
+                            nRoleID,
+                            cModuleCode = item
+                        });
+                    }
+                    strSQL = "INSERT INTO Sys_RoleForModule(TenantId,nRoleID,cModuleCode)VALUES(@nCompanyID,@nRoleID,@cModuleCode)";
+                    Db.ExecuteNonQuery(strSQL, insertEntity);
+
+                    strSQL = @"INSERT INTO Sys_RoleForModule(TenantId,nRoleID,cModuleCode)
+                       SELECT DISTINCT @nCompanyID,@nRoleID,cCode FROM Sys_Module WHERE  ID in (SELECT nPID From Sys_Module where cCode in @cModuleCode)";
+                    Db.ExecuteNonQuery(strSQL, new { nCompanyID = Auth.TenantId, nRoleID, cModuleCode = moduleCodes });
+                }
+
+                Db.Commit();
+
+                return Json(new
+                {
+                    status = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                Db.Rollback();
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+            //return Json(new { status=0});
+        }
+
+        #region 穿梭框
+        public JsonResult UserGetData()
+        {
+            List<UserGet> list = new List<UserGet>();
+            List<Sys_User> column = Db.ExecuteEntities<Sys_User>(@"SELECT UserID,cName FROM Sys_User WHERE iStatus=1 AND TenantId=@TenantId ", new { TenantId=Auth.TenantId });
+            foreach (var item in column)
+            {
+                UserGet users = new UserGet();
+                users.key = item.UserId;
+                users.label = item.cName;
+                users.disabled = false;
+                list.Add(users);
+            }
+            return Json(list);
+        }
+
+        public JsonResult GetRoleUserList(ClientModel client)
+        {
+            int? nRoleID = client.GetInt("nRoleID");
+            dynamic roleUserList = Db.ExecuteEntities<dynamic>(@"SELECT UserId FROM Sys_UserInRole WHERE TenantId=@TenantId and nRoleID=@nRoleID ", new { TenantId=Auth.TenantId, nRoleID });
+            List<string> returns = new List<string>();
+            foreach (var item in roleUserList)
+            {
+                returns.Add(item.UserId);
+            }
+            return Json(returns);
+        }
+
+        public JsonResult SaveRoleUserList(ClientModel client)
+        {
+            int? nRoleID = client.GetInt("nRoleID");
+            string[] keys = client.GetArray<string>("targetKeys");
+            try
+            {
+                Db.BeginTransaction();
+                Db.ExecuteNonQuery("delete Sys_UserInRole where TenantId=@TenantId and nRoleID=@nRoleID", new { TenantId=Auth.TenantId, nRoleID });
+
+                List<object> paramsIn = new List<object>();
+                foreach (var key in keys)
+                {
+                    paramsIn.Add(new { TenantId = Auth.TenantId, UserId = key, nRoleID });
+                }
+
+                Db.ExecuteNonQuery(@"INSERT INTO Sys_UserInRole (TenantId,UserId,nRoleID)
+                                 VALUES(@TenantId,@UserId,@nRoleID)", paramsIn);
+
+                Db.Commit();
+
+                return Json(new
+                {
+                    status = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+
+        }
+
+        public class UserGet
+        {
+            public string key { get; set; }
+            public string label { get; set; }
+            public bool? disabled { get; set; }
+        }
+        #endregion
     }
 }

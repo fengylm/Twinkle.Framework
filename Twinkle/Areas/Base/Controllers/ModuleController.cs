@@ -127,14 +127,14 @@ namespace Twinkle.Areas.Base.Controllers
             }
         }
 
-        public class Node
-        {
-            public string label { get; set; }
-            public Boolean? expand { get; set; }
-            public List<Node> children { get; set; }
-            public double? id { get; set; }
+        //public class Node
+        //{
+        //    public string label { get; set; }
+        //    public Boolean? expand { get; set; }
+        //    public List<Node> children { get; set; }
+        //    public double? id { get; set; }
             
 
-        }
+        //}
     }
 }

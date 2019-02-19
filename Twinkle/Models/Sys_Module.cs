@@ -20,5 +20,8 @@
 
         [ModelProperty(OnlyInsert = true)]
         public int? iStatus { get; set; }
+        public string cModuleCode { get; set; }
+        [ModelProperty(Virtual = true)]
+        public int? iHasRole { get; set; }
     }
 }
