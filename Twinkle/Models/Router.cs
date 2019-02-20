@@ -30,6 +30,6 @@ namespace Twinkle.Models
         /// <summary>
         /// 子模块信息
         /// </summary>
-        public Router[] Children { get; set; }
+        public List<Router> Children { get; set; }
     }
 }

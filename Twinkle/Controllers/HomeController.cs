@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.Security.Authorization;
 using Twinkle.Framework.Security.Cryptography;
@@ -157,62 +158,113 @@ namespace Twinkle.Controllers
 
         public JsonResult GetRouters()
         {
+            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"select * from Sys_Module where nPID=0 and cCode in ( select cModuleCode from Sys_UserInRole T 
+                                                                        left join Sys_RoleForModule T1 on T1.nRoleID = T.nRoleID and T1.TenantId = T.TenantId
+                                                                        where T.TenantId = @TenantId and  T.UserId = @UserId) ", new { TenantId = Auth.TenantId, UserId = Auth.UserId });
             List<Router> lstRouter = new List<Router>();
-            lstRouter.Add(new Router
+
+            //lstRouter.Add(new Router
+            //{
+            //    Url = "/setting",
+            //    Title = "设置",
+            //    Children = new Router[] {
+            //         new Router
+            //        {
+            //            Url = "/module",
+            //            Path = "base/Module",
+            //            Title = "功能模块",
+            //        },
+            //        new Router
+            //        {
+            //            Url = "/user",
+            //            Path = "base/User",
+            //            Title = "用户信息",
+            //        },
+            //        new Router
+            //        {
+            //            Url = "/role",
+            //            Path = "base/Role",
+            //            Title = "权限信息",
+            //        },
+            //    }
+            //});
+            //lstRouter.Add(new Router
+            //{
+            //    Url = "/Demo",
+            //    Title = "Demo",
+            //    Children = new Router[] {
+            //        new Router
+            //        {
+            //            Url = "/Examples",
+            //            Path = "demo/Examples",
+            //            Title = "Examples",
+            //        },
+            //    }
+            //});
+            //lstRouter.Add(router);
+            foreach (var item in listModule)
             {
-                Url = "/setting",
-                Title = "设置",
-                Children = new Router[] {
-                     new Router
-                    {
-                        Url = "/module",
-                        Path = "base/Module",
-                        Title = "功能模块",
-                    },
-                    new Router
-                    {
-                        Url = "/user",
-                        Path = "base/User",
-                        Title = "用户信息",
-                    },
-                    new Router
-                    {
-                        Url = "/role",
-                        Path = "base/Role",
-                        Title = "权限信息",
-                    },
+                Router router = new Router();
+                router.Title = item.cTitle;
+                router.Url = item.cRoute;
+                router.Path = item.cPath;
+                if (router.Children == null)
+                {
+                    router.Children = new List<Router>();
                 }
-            });
-            lstRouter.Add(new Router
-            {
-                Url = "/Demo",
-                Title = "Demo",
-                Children = new Router[] {
-                    new Router
+                List<Sys_Module> list = Db.ExecuteEntities<Sys_Module>(@"select * from Sys_Module where nPID=@nPID and cCode in ( select cModuleCode from Sys_UserInRole T 
+                                                                        left join Sys_RoleForModule T1 on T1.nRoleID=T.nRoleID and T1.TenantId=T.TenantId
+                                                                        where T.TenantId=@TenantId and  T.UserId=@UserId )", new { nPID = item.ID, TenantId = Auth.TenantId, UserId = Auth.UserId });
+                for (int i = 0; i < list.Count; i++)
+                {
+                    Router subRouter = new Router();
+                    subRouter.Title = list[i].cTitle;
+                    subRouter.Url = list[i].cRoute;
+                    subRouter.Path = list[i].cPath;
+                    if (subRouter.Children == null)
                     {
-                        Url = "/Examples",
-                        Path = "demo/Examples",
-                        Title = "Examples",
-                    },
+                        subRouter.Children = new List<Router>();
+                    }
+                    router.Children.Add(subRouter);
                 }
-            });
-            lstRouter.Add(new Router
-            {
-                Url = "/Examples1",
-                Title = "(Examples)独立页面",
-                Path = "demo/Examples",
-                IsSingle = true,
-            });
-            lstRouter.Add(new Router
-            {
-                Url = "/Test",
-                Title = "(Test)内置页面",
-                Path = "demo/Test",
-                IsSingle = false,
-            });
+                lstRouter.Add(router);
+            }
+            //lstRouter.Add(new Router
+            //{
+            //    Url = "/Examples1",
+            //    Title = "(Examples)独立页面",
+            //    Path = "demo/Examples",
+            //    IsSingle = true,
+            //});
+            //lstRouter.Add(new Router
+            //{
+            //    Url = "/Test",
+            //    Title = "(Test)内置页面",
+            //    Path = "demo/Test",
+            //    IsSingle = false,
+            //});
 
             return Json(lstRouter);
         }
+
+        //public void RouterBuild(List<Sys_Module> list)
+        //{
+        //    foreach (var item in list.Where(p => { return p.nPID == 0; }))
+        //    {
+        //        Router subRouter = new Router();
+        //        subRouter.Title = item.cTitle;
+        //        subRouter.Url = item.cRoute;
+        //        subRouter.Path = item.cPath;
+        //        subRouter.IsSingle = false;
+        //        if (subRouter.Children == null)
+        //        {
+        //            subRouter.Children = new List<Router>();
+        //        }
+        //        subRouter.Children.Add(subRouter);
+
+        //        RouterBuild(list);
+        //    }
+        //}
 
 
         [AllowAnonymous]
