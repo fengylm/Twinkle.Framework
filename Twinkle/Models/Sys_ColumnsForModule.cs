@@ -17,8 +17,12 @@ namespace Twinkle.Models
         public int? nWidth { get; set; }
         public string cAlign { get; set; }
         public int? iShow { get; set; }
+        public int? iSum { get; set; }
+        public int? iSort { get; set; }
+        public int? iFilter { get; set; }
 
-        public string cSummaryType { get; set; }
+        public string cGroupHeader { get; set; }
+        public string cFormatter { get; set; }
         public string cColumnRender { get; set; }
         public string cHeaderRender { get; set; }
         public double? nOrderID { get; set; }

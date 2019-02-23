@@ -14,7 +14,7 @@ namespace Twinkle.Areas.Base.Controllers
         {
             int? ID = client.GetInt("ID") ?? 0;
             string sql = @"SELECT * FROM Sys_Module where 1=1 and nPID=@ID";
-            return Paging(sql, "ID", client, new { ID });
+            return Paging(sql, "nOrderID", client, new { ID });
         }
 
         public JsonResult GetPCode(ClientModel client)
@@ -37,7 +37,7 @@ namespace Twinkle.Areas.Base.Controllers
                 id = 0
             };
 
-            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"SELECT * FROM Sys_Module where nPID =0 order by ID ");
+            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"SELECT * FROM Sys_Module where nPID =0 order by nOrderID ");
 
             NodeBuilder(node, listModule);
 
@@ -126,6 +126,59 @@ namespace Twinkle.Areas.Base.Controllers
                 return 0;
             }
         }
+
+        #region 菜单模块排序
+        public JsonResult SortModule(ClientModel clientModel)
+        {
+            //不支持夸父节点调整 所以 current和target一定拥有相同的父节点
+            Sys_Module current = clientModel.GetEntity<Sys_Module>("current");
+            Sys_Module target = clientModel.GetEntity<Sys_Module>("target");
+
+            double nPID = current.nPID.Value;
+
+            double nTID = target.ID.Value;
+
+            string type = clientModel.GetString("type");
+
+
+
+
+            string sortSQL = string.Empty;
+
+            if (type == "after")// 只有排序到最后一个时才会是after
+            {
+                sortSQL = @"BEGIN TRAN
+                                DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND  ID<>@ID ORDER BY nOrderID
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY nOrderID
+                                
+                                UPDATE Sys_Module SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_Module.ID)
+                                WHERE nPID=@nPID
+                            COMMIT";
+                Db.ExecuteNonQuery(sortSQL, new { nPID, current.ID });
+            }
+            else
+            {
+                sortSQL = @"BEGIN TRAN
+                                DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND  nOrderID<(SELECT nOrderID FROM Sys_Module WHERE ID=@nTID) AND ID<>@ID ORDER BY nOrderID
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY nOrderID
+                                 INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND  nOrderID>=(SELECT nOrderID FROM Sys_Module WHERE ID=@nTID) AND ID<>@ID ORDER BY nOrderID
+                                
+                                UPDATE Sys_Module SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_Module.ID)
+                                WHERE nPID=@nPID
+                            COMMIT";
+                Db.ExecuteNonQuery(sortSQL, new { nPID, current.ID, nTID });
+            }
+
+            return GetParent();
+        }
+        #endregion
 
         #region 列布局操作
         #region 获取列配置名称
