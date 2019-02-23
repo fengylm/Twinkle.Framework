@@ -311,6 +311,86 @@ namespace Twinkle.Areas.Base.Controllers
         #endregion
         #endregion
 
+        #region 按钮注册操作
+        #region 加载注册按钮信息
+        public JsonResult LoadButtonRegist(ClientModel clientModel)
+        {
+            string cModuleCode = clientModel.GetString("cModuleCode");
+            string strSQL = "SELECT * FROM Sys_ButtonsForModule WHERE cModuleCode=@cModuleCode";
+            return this.Paging(strSQL, "ID",clientModel, new
+            {
+                cModuleCode = cModuleCode
+            });
+        }
+        #endregion
+
+        #region 删除注册按钮
+        public JsonResult DeleteButtonRegist(ClientModel clientModel)
+        {
+            int? ID = clientModel.GetInt("ID");
+            string strSQL = "delete Sys_ButtonsForModule where ID=@ID";
+            try
+            {
+                if (Db.ExecuteNonQuery(strSQL, new { ID }) > 0)
+                {
+                    return Json(new
+                    {
+                        status = 0
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 2
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+        }
+        #endregion
+
+        #region 保存注册按钮
+        public JsonResult SaveButtonRegist(ClientModel clientModel)
+        {
+            Sys_ButtonsForModule module = clientModel.GetEntity<Sys_ButtonsForModule>("buttonModel");
+            try
+            {
+                if (module.InsertOrUpdate() > 0)
+                {
+                    return Json(new
+                    {
+                        status = 0
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 2
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+            //return Json(new { status=0});
+        }
+        #endregion
+        #endregion
+
         //public class Node
         //{
         //    public string label { get; set; }
