@@ -127,13 +127,197 @@ namespace Twinkle.Areas.Base.Controllers
             }
         }
 
+        #region 列布局操作
+        #region 获取列配置名称
+        public JsonResult GetCustomColumnModuleCode()
+        {
+            string strSQL = "SELECT distinct cModuleCode value,cModuleName text FROM Sys_ColumnsForModule where cModuleCode=cModuleName";
+            return Json(Db.ExecuteEntities<dynamic>(strSQL));
+
+        }
+        #endregion
+        #region 保存列配置信息
+        public JsonResult SaveColumnConfig(ClientModel clientModel)
+        {
+            Sys_ColumnsForModule module = clientModel.GetEntity<Sys_ColumnsForModule>("columnModel");
+            try
+            {
+                if (module.InsertOrUpdate() > 0)
+                {
+                    return Json(new
+                    {
+                        status = 0
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 2
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+        }
+        #endregion
+        #region 加载列数据
+        public JsonResult LoadConfig(ClientModel clientModel)
+        {
+            string cModuleCode = clientModel.GetString("cModuleCode");
+            int? iShow = clientModel.GetInt("iShow");
+            string strSQL = "SELECT * FROM Sys_ColumnsForModule WHERE cModuleCode=@cModuleCode and (iShow=@iShow or iShow=1)";
+            return this.Paging(strSQL, "nOrderID",clientModel, new
+            {
+                cModuleCode = cModuleCode,
+                iShow = iShow
+            });
+        }
+        #endregion
+        #region 删除列数据
+        public JsonResult DeleteColumnConfig(ClientModel clientModel)
+        {
+            int? ID = clientModel.GetInt("ID");
+            string strSQL = "delete Sys_ColumnsForModule where ID=@ID";
+            try
+            {
+                if (Db.ExecuteNonQuery(strSQL, new { ID }) > 0)
+                {
+                    return Json(new
+                    {
+                        status = 0
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 2
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+        }
+        #endregion
+        #region 列排序
+        public JsonResult SortLayoutConfig(ClientModel clientModel)
+        {
+            //不支持夸父节点调整 所以 current和target一定拥有相同的父节点
+            Sys_ColumnsForModule current = clientModel.GetEntity<Sys_ColumnsForModule>("current");
+            Sys_ColumnsForModule target = clientModel.GetEntity<Sys_ColumnsForModule>("target");
+
+            string cModuleCode = current.cModuleCode;
+
+            double TID = target.ID.Value;
+
+            string type = clientModel.GetString("type");
+
+
+
+
+            string sortSQL = string.Empty;
+
+            if (type == "after")// 只有排序到最后一个时才会是after
+            {
+                sortSQL = @"BEGIN TRAN
+                                DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  ID<>@ID ORDER BY nOrderID
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY nOrderID
+                                
+                                UPDATE Sys_ColumnsForModule SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_ColumnsForModule.ID)
+                                WHERE cModuleCode=@cModuleCode
+                            COMMIT";
+                Db.ExecuteNonQuery(sortSQL, new { cModuleCode, current.ID });
+            }
+            else
+            {
+                sortSQL = @"BEGIN TRAN
+                                DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  nOrderID<(SELECT nOrderID FROM Sys_ColumnsForModule WHERE ID=@TID) AND ID<>@ID ORDER BY nOrderID
+                                INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY nOrderID
+                                 INSERT INTO @sortTable(ID)
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  nOrderID>=(SELECT nOrderID FROM Sys_ColumnsForModule WHERE ID=@TID) AND ID<>@ID ORDER BY nOrderID
+                                
+                                UPDATE Sys_ColumnsForModule SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_ColumnsForModule.ID)
+                                WHERE cModuleCode=@cModuleCode
+                            COMMIT";
+                Db.ExecuteNonQuery(sortSQL, new { cModuleCode, current.ID, TID });
+            }
+
+            return Json(new { status = 0 });
+        }
+        #endregion
+        #region 获取数据库表信息
+        public JsonResult GetAppTable()
+        {
+            string strSQL = "SELECT DISTINCT [表名] value,[表名] label FROM V_Sys_GetTablesInfo";
+            return Json(Db.ExecuteEntities<dynamic>(strSQL));
+        }
+        #endregion
+        #region 根据数据库表信息创建初始化数据
+        public JsonResult InitData(ClientModel clientModel)
+        {
+            string code = clientModel.GetString("code");
+            string name = clientModel.GetString("name");
+            string table = clientModel.GetString("table");
+
+            string strSQL = "DELETE Sys_ColumnsForModule WHERE cModuleCode=@cModuleCode;";
+            strSQL += " INSERT INTO Sys_ColumnsForModule(cModuleCode,cModuleName,cField,cTitle,cDataType,nOrderID,nWidth,cAlign,iShow)";
+            strSQL += " SELECT @cModuleCode,@cModuleName,[列名称],[列备注],[列归类],ROW_NUMBER() OVER(ORDER BY (SELECT 0)),120,'center',1 FROM V_Sys_GetTablesInfo where [表名]=@table";
+
+            try
+            {
+                if (Db.ExecuteNonQuery(strSQL, new { cModuleCode = code, cModuleName = name, table }) > 0)
+                {
+                    return Json(new
+                    {
+                        status = 0
+                    });
+                }
+                else
+                {
+                    return Json(new
+                    {
+                        status = 2
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+        }
+        #endregion
+        #endregion
+
         //public class Node
         //{
         //    public string label { get; set; }
         //    public Boolean? expand { get; set; }
         //    public List<Node> children { get; set; }
         //    public double? id { get; set; }
-            
+
 
         //}
     }
