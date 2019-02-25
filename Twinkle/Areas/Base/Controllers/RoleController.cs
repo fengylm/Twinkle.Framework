@@ -75,6 +75,218 @@ namespace Twinkle.Areas.Base.Controllers
         }
         #endregion
 
+        public JsonResult GetColumnData(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("ID");
+            string cModuleCode = clientModel.GetString("cCode");
+
+            string strSQL = @"SELECT T.cTitle,T.cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ColumnsForModule T
+                              LEFT JOIN Sys_RoleForColumn T1 ON T.cModuleCode=T1.cModuleCode AND T.cField=T1.cField
+                              AND T1.TenantId=@TenantId and T1.nRoleID=@nRoleID 
+                              WHERE T.cModuleCode=@cModuleCode and T.iShow=1
+                              ORDER BY T.nOrderID";
+
+            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId=Auth.TenantId });
+
+            Node node = new Node
+            {
+                label = "可授权列",
+                expand = true,
+                leaf = false,
+                key = cModuleCode,
+                children = new List<Node>()
+            };
+            foreach (var item in data)
+            {
+                node.children.Add(new Node
+                {
+                    label = item.cTitle,
+                    cField = item.cField,
+                    leaf = true,
+                    key = cModuleCode,
+                    @checked = item.iHasRole > 0
+                });
+            }
+            return Json(node);
+        }
+
+        public JsonResult GetButtonData(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("nRoleID");
+            string cModuleCode = clientModel.GetString("cModuleCode");
+
+            string strSQL = @"SELECT T.cButtonName cTitle,T.cButtonID cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ButtonsForModule T
+                              LEFT JOIN Sys_RoleForButton T1 ON T.cModuleCode=T1.cModuleCode AND T.cButtonID=T1.cButtonID
+                              AND T1.TenantId=@TenantId and T1.nRoleID=@nRoleID 
+                              WHERE T.cModuleCode=@cModuleCode";
+
+            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId=Auth.TenantId });
+
+            Node node = new Node
+            {
+                label = "可授权按钮",
+                expand = true,
+                leaf = false,
+                key = cModuleCode,
+                children = new List<Node>()
+            };
+            foreach (var item in data)
+            {
+                node.children.Add(new Node
+                {
+                    label = item.cTitle,
+                    cField = item.cField,
+                    leaf = true,
+                    key = cModuleCode,
+                    @checked = item.iHasRole > 0
+                });
+            }
+            return Json(node);
+        }
+
+        public JsonResult ColumnRoleSet(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("roleID");
+            string[] fieldCodes = clientModel.GetArray<string>("fieldArr");
+            string cModuleCode = clientModel.GetString("cModuleCode");
+            Db.BeginTransaction();
+
+            try
+            {
+                string strSQL = "DELETE Sys_RoleForColumn WHERE TenantId=@TenantId and nRoleID=@nRoleID and cModuleCode=@cModuleCode";
+                Db.ExecuteNonQuery(strSQL, new { TenantId = Auth.TenantId, nRoleID, cModuleCode });
+
+                if (fieldCodes != null && fieldCodes.Length > 0)
+                {
+                    List<object> insertEntity = new List<object>();
+                    foreach (var item in fieldCodes)
+                    {
+                        insertEntity.Add(new
+                        {
+                            TenantId = Auth.TenantId,
+                            nRoleID,
+                            cModuleCode,
+                            cField = item
+                        });
+                    }
+                    strSQL = "INSERT INTO Sys_RoleForColumn(TenantId,nRoleID,cModuleCode,cField)VALUES(@TenantId,@nRoleID,@cModuleCode,@cField)";
+                    Db.ExecuteNonQuery(strSQL, insertEntity);
+                }
+
+                Db.Commit();
+
+                return Json(new
+                {
+                    status = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                Db.Rollback();
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+
+        }
+
+        public JsonResult ButtonRoleSet(ClientModel clientModel)
+        {
+            int? nRoleID = clientModel.GetInt("roleID");
+            string[] fieldCodes = clientModel.GetArray<string>("fieldArr");
+            string cModuleCode = clientModel.GetString("cModuleCode");
+            Db.BeginTransaction();
+
+            try
+            {
+                string strSQL = "DELETE Sys_RoleForButton WHERE TenantId=@TenantId and nRoleID=@nRoleID and cModuleCode=@cModuleCode";
+                Db.ExecuteNonQuery(strSQL, new { TenantId = Auth.TenantId, nRoleID, cModuleCode });
+
+                if (fieldCodes != null && fieldCodes.Length > 0)
+                {
+                    List<object> insertEntity = new List<object>();
+                    foreach (var item in fieldCodes)
+                    {
+                        insertEntity.Add(new
+                        {
+                            TenantId = Auth.TenantId,
+                            nRoleID,
+                            cModuleCode,
+                            cField = item
+                        });
+                    }
+                    strSQL = "INSERT INTO Sys_RoleForButton(TenantId,nRoleID,cModuleCode,cButtonID)VALUES(@TenantId,@nRoleID,@cModuleCode,@cField)";
+                    Db.ExecuteNonQuery(strSQL, insertEntity);
+                }
+
+                Db.Commit();
+
+                return Json(new
+                {
+                    status = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                Db.Rollback();
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+
+        }
+
+        public JsonResult RoleSet(ClientModel clientModel)
+        {
+            int? status = clientModel.GetInt("status");
+            int? nRoleID = clientModel.GetInt("roleID");
+            Db.BeginTransaction();
+            try
+            {
+                string strSQL = "DELETE Sys_RoleForModule WHERE TenantId=@TenantId and nRoleID=@nRoleID;";
+
+                strSQL += "DELETE Sys_RoleForColumn WHERE TenantId=@TenantId and nRoleID=@nRoleID;";
+
+                strSQL += "DELETE Sys_RoleForButton WHERE TenantId=@TenantId and nRoleID=@nRoleID;";
+                Db.ExecuteNonQuery(strSQL, new { nRoleID, TenantId = Auth.TenantId });
+
+                if (status == 1)
+                {
+                    strSQL = @"INSERT INTO Sys_RoleForModule(TenantId,nRoleID,cModuleCode)
+                           SELECT @TenantId,@nRoleID,cCode from Sys_Module;";
+
+                    strSQL += @"INSERT INTO Sys_RoleForColumn(TenantId,nRoleID,cModuleCode,cField)
+                           SELECT @TenantId,@nRoleID,cModuleCode,cField FROM Sys_ColumnsForModule; ";
+
+                    strSQL += @"INSERT INTO Sys_RoleForButton(TenantId,nRoleID,cModuleCode,cButtonID)
+                           SELECT @TenantId,@nRoleID,cModuleCode,cButtonID FROM Sys_ButtonsForModule; ";
+
+                    Db.ExecuteNonQuery(strSQL, new { nRoleID, TenantId = Auth.TenantId });
+                }
+
+                Db.Commit();
+
+                return Json(new
+                {
+                    status = 0
+                });
+            }
+            catch (Exception ex)
+            {
+                Db.Rollback();
+                return Json(new
+                {
+                    status = 1,
+                    msg = ex.Message
+                });
+            }
+
+        }
+
 
         public JsonResult Save(ClientModel client)
         {
