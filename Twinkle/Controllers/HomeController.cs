@@ -202,9 +202,28 @@ namespace Twinkle.Controllers
         /// <returns></returns>
         public JsonResult GetColumnConfig(string code)
         {
-            string strSQL = @"SELECT * FROM Sys_ColumnsForModule WHERE cModuleCode=@code AND iShow=1
-                            ORDER BY nOrderID";
-            return Json(new { status = 0, data = Db.ExecuteEntities<Sys_ColumnsForModule>(strSQL, new { code }) });
+            string strSQL = @"SELECT * FROM Sys_ColumnsForModule T
+                                INNER JOIN Sys_RoleForColumn T1 ON T.cModuleCode=T1.cModuleCode
+                                INNER JOIN Sys_UserInRole T2 ON T1.nRoleID=T2.nRoleID AND T1.TenantId=T2.TenantId
+                                WHERE T.iShow=1 AND T.cModuleCode=@code and  T2.TenantId=@TenantId AND T2.UserId=@UserId
+                            ORDER BY T.nOrderID";
+            return Json(new { status = 0, data = Db.ExecuteEntities<Sys_ColumnsForModule>(strSQL, new { code,Auth.TenantId,Auth.UserId }) });
+        }
+
+        /// <summary>
+        /// 加载按钮权限
+        /// </summary>
+        /// <param name="cModuleCode"></param>
+        /// <returns></returns>
+        public JsonResult LoadButtonRole(string code)
+        {
+            string strSQL = @"SELECT distinct T.cButtonID FROM Sys_ButtonsForModule T
+                                INNER JOIN Sys_RoleForButton T1 ON T.cModuleCode=T1.cModuleCode and T.cButtonID=T1.cButtonID
+                                INNER JOIN Sys_UserInRole T2 ON T1.nRoleID=T2.nRoleID AND T1.TenantId=T2.TenantId 
+                                WHERE T.cModuleCode=@code AND T2.TenantId=@TenantId AND T2.UserId=@UserId";
+
+            return Json(new { status = 0, data = Db.ExecuteEntities<Sys_ColumnsForModule>(strSQL, new { code, Auth.TenantId, Auth.UserId }) });
+
         }
 
 

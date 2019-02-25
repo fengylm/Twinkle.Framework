@@ -80,13 +80,13 @@ namespace Twinkle.Areas.Base.Controllers
             int? nRoleID = clientModel.GetInt("ID");
             string cModuleCode = clientModel.GetString("cCode");
 
-            string strSQL = @"SELECT T.cTitle,T.cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ColumnsForModule T
+            string strSQL = @"SELECT T.ID, T.cTitle,T.cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ColumnsForModule T
                               LEFT JOIN Sys_RoleForColumn T1 ON T.cModuleCode=T1.cModuleCode AND T.cField=T1.cField
                               AND T1.TenantId=@TenantId and T1.nRoleID=@nRoleID 
                               WHERE T.cModuleCode=@cModuleCode and T.iShow=1
                               ORDER BY T.nOrderID";
 
-            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId=Auth.TenantId });
+            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId = Auth.TenantId });
 
             Node node = new Node
             {
@@ -94,6 +94,7 @@ namespace Twinkle.Areas.Base.Controllers
                 expand = true,
                 leaf = false,
                 key = cModuleCode,
+                id = -1,
                 children = new List<Node>()
             };
             foreach (var item in data)
@@ -102,12 +103,16 @@ namespace Twinkle.Areas.Base.Controllers
                 {
                     label = item.cTitle,
                     cField = item.cField,
+                    id = Convert.ToDouble(item.ID),
                     leaf = true,
                     key = cModuleCode,
                     @checked = item.iHasRole > 0
                 });
             }
-            return Json(node);
+
+            var ids = (data as List<dynamic>).Where(p => p.iHasRole == 1).Select(p => p.ID).ToArray();
+
+            return Json(new { cols = node, ids });
         }
 
         public JsonResult GetButtonData(ClientModel clientModel)
@@ -115,16 +120,17 @@ namespace Twinkle.Areas.Base.Controllers
             int? nRoleID = clientModel.GetInt("nRoleID");
             string cModuleCode = clientModel.GetString("cModuleCode");
 
-            string strSQL = @"SELECT T.cButtonName cTitle,T.cButtonID cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ButtonsForModule T
+            string strSQL = @"SELECT T.ID, T.cButtonName cTitle,T.cButtonID cField,T.cModuleCode,ISNULL(T1.nRoleID,0) iHasRole FROM Sys_ButtonsForModule T
                               LEFT JOIN Sys_RoleForButton T1 ON T.cModuleCode=T1.cModuleCode AND T.cButtonID=T1.cButtonID
                               AND T1.TenantId=@TenantId and T1.nRoleID=@nRoleID 
                               WHERE T.cModuleCode=@cModuleCode";
 
-            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId=Auth.TenantId });
+            dynamic data = Db.ExecuteEntities<dynamic>(strSQL, new { nRoleID, cModuleCode, TenantId = Auth.TenantId });
 
             Node node = new Node
             {
                 label = "可授权按钮",
+                id = -1,
                 expand = true,
                 leaf = false,
                 key = cModuleCode,
@@ -136,12 +142,15 @@ namespace Twinkle.Areas.Base.Controllers
                 {
                     label = item.cTitle,
                     cField = item.cField,
+                    id = Convert.ToDouble(item.ID),
                     leaf = true,
                     key = cModuleCode,
                     @checked = item.iHasRole > 0
                 });
             }
-            return Json(node);
+
+            var ids = (data as List<dynamic>).Where(p => p.iHasRole == 1).Select(p => p.ID).ToArray();
+            return Json(new { btns = node, ids });
         }
 
         public JsonResult ColumnRoleSet(ClientModel clientModel)
@@ -409,7 +418,7 @@ namespace Twinkle.Areas.Base.Controllers
         public JsonResult UserGetData()
         {
             List<UserGet> list = new List<UserGet>();
-            List<Sys_User> column = Db.ExecuteEntities<Sys_User>(@"SELECT UserID,cName FROM Sys_User WHERE iStatus=1 AND TenantId=@TenantId ", new { TenantId=Auth.TenantId });
+            List<Sys_User> column = Db.ExecuteEntities<Sys_User>(@"SELECT UserID,cName FROM Sys_User WHERE iStatus=1 AND TenantId=@TenantId ", new { TenantId = Auth.TenantId });
             foreach (var item in column)
             {
                 UserGet users = new UserGet();
@@ -424,7 +433,7 @@ namespace Twinkle.Areas.Base.Controllers
         public JsonResult GetRoleUserList(ClientModel client)
         {
             int? nRoleID = client.GetInt("nRoleID");
-            dynamic roleUserList = Db.ExecuteEntities<dynamic>(@"SELECT UserId FROM Sys_UserInRole WHERE TenantId=@TenantId and nRoleID=@nRoleID ", new { TenantId=Auth.TenantId, nRoleID });
+            dynamic roleUserList = Db.ExecuteEntities<dynamic>(@"SELECT UserId FROM Sys_UserInRole WHERE TenantId=@TenantId and nRoleID=@nRoleID ", new { TenantId = Auth.TenantId, nRoleID });
             List<string> returns = new List<string>();
             foreach (var item in roleUserList)
             {
@@ -440,7 +449,7 @@ namespace Twinkle.Areas.Base.Controllers
             try
             {
                 Db.BeginTransaction();
-                Db.ExecuteNonQuery("delete Sys_UserInRole where TenantId=@TenantId and nRoleID=@nRoleID", new { TenantId=Auth.TenantId, nRoleID });
+                Db.ExecuteNonQuery("delete Sys_UserInRole where TenantId=@TenantId and nRoleID=@nRoleID", new { TenantId = Auth.TenantId, nRoleID });
 
                 List<object> paramsIn = new List<object>();
                 foreach (var key in keys)
