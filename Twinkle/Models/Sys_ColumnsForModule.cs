@@ -20,11 +20,15 @@ namespace Twinkle.Models
         public int? iSum { get; set; }
         public int? iSort { get; set; }
         public int? iFilter { get; set; }
-
+        public int? iEdit { get; set; }
+        public int? iSpan { get; set; }
+        public int nPrecision { get; set; }
         public string cGroupHeader { get; set; }
         public string cFormatter { get; set; }
         public string cColumnRender { get; set; }
         public string cHeaderRender { get; set; }
         public double? nOrderID { get; set; }
+        public string cChangeFn { get; set; }
+        public string cFixed { get; set; }
     }
 }

@@ -1,0 +1,55 @@
+﻿{
+  "Strategy": "Update",
+  "TableName": "demo",
+  "Mappings": [
+    {
+      "DBColumn": "cName",
+      "FileColumn": "姓名",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": false
+    },
+    {
+      "DBColumn": "iSex",
+      "FileColumn": "性别",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Number",
+      "Key": false,
+      "AllowNull": false
+    },
+    {
+      "DBColumn": "dBirthday",
+      "FileColumn": "生日",
+      "Value": null,
+      "Macro": 0,
+      "Type": "Date",
+      "Key": false
+    },
+    {
+      "DBColumn": "cSchool",
+      "FileColumn": "毕业学校",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": false
+    },
+    {
+      "DBColumn": "cSpecialty",
+      "FileColumn": "专业",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": false
+    },
+    {
+      "DBColumn": "cRemark",
+      "FileColumn": "备注",
+      "Value": null,
+      "Macro": 0,
+      "Type": "String",
+      "Key": false
+    }
+  ]
+}

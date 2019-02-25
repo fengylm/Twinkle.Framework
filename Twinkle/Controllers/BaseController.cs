@@ -1,16 +1,18 @@
 ﻿using Aspose.Cells;
-using log4net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Twinkle.Framework.Database;
 using Twinkle.Framework.Extensions;
 using Twinkle.Framework.Security.Authorization;
 using Twinkle.Framework.Utils;
+using Twinkle.Models;
 
 namespace Twinkle.Controllers
 {
@@ -24,7 +26,7 @@ namespace Twinkle.Controllers
         public BaseController()
         {
             Db = TwinkleContext.GetRequiredService<DatabaseManager>();
-            Auth = TwinkleContext.GetService<TokenAuthManager>().GetUser(TwinkleContext.UserToken) ?? new AuthUser() ;
+            Auth = TwinkleContext.GetService<TokenAuthManager>().GetUser(TwinkleContext.UserToken) ?? new AuthUser();
             Auth.TenantId = "0000000000";// 暂时没有多租户模块 给予一个默认租户编码
 
             Logger = GetLogger((dynamic)this);
@@ -106,18 +108,57 @@ namespace Twinkle.Controllers
         /// 写入响应流,生成下载文件
         /// </summary>
         /// <returns></returns>
-        public IActionResult FileDownload(DataTable soure, string fileName)
+        public IActionResult FileDownload(DataTable source, string fileName)
         {
             string ext = FileHelper.FileExtension(fileName);
             SaveFormat saveFormat = (SaveFormat)Enum.Parse(typeof(SaveFormat), ext, true);
             using (Workbook wb = new Workbook())
             {
-                wb.Worksheets[0].Cells.ImportData(soure, 0, 0, new ImportTableOptions { });
+                wb.Worksheets[0].Cells.ImportData(source, 0, 0, new ImportTableOptions { });
                 MemoryStream stream = new MemoryStream();
                 wb.Save(stream, saveFormat);
                 return WebHelper.DownLoad(stream, fileName);
             }
         }
 
+        /// <summary>
+        /// 生成导出excel
+        /// </summary>
+        /// <param name="source">要导出的数据</param>
+        /// <param name="code">配置信息</param>
+        /// <param name="fileName">要导出的文件名</param>
+        /// <returns></returns>
+        public IActionResult ExportData(DataTable source, string code, string fileName)
+        {
+            string strSQL = @"SELECT * FROM Sys_ColumnsForModule WHERE cModuleCode=@code AND iShow=1
+                            ORDER BY nOrderID";
+            List<Sys_ColumnsForModule> lst = Db.ExecuteEntities<Sys_ColumnsForModule>(strSQL, new { code });
+
+
+            for (int i = source.Columns.Count - 1; i >= 0; i--)
+            {
+                Sys_ColumnsForModule module = lst.Where(p => p.cField.ToLower() == source.Columns[i].ColumnName.ToLower()).FirstOrDefault();
+                if (module == null)
+                {
+                    source.Columns.RemoveAt(i);
+                }
+                else
+                {
+                    source.Columns[i].ColumnName = module.cTitle;
+                }
+            }
+
+            string ext = FileHelper.FileExtension(fileName);
+            SaveFormat saveFormat = (SaveFormat)Enum.Parse(typeof(SaveFormat), ext, true);
+            using (Workbook wb = new Workbook())
+            {
+                wb.Worksheets[0].Cells.ImportData(source, 0, 0, new ImportTableOptions { });
+                wb.Worksheets[0].FreezePanes(1, 0, 1, source.Columns.Count);
+                MemoryStream stream = new MemoryStream();
+                wb.Save(stream, saveFormat);
+                return WebHelper.DownLoad(stream, fileName);
+            }
+
+        }
     }
 }

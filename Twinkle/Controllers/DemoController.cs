@@ -60,31 +60,32 @@ namespace Twinkle.Controllers
         public async Task Upload(UploadModel args)
         {
             DataImport si = DataImportFactory.CreateDataImport();
-            si.Init(args.FileStream, "twtable");
+            si.Init(args.FileStream, "demo");
 
             await si.ExcuteAsync();
         }
 
         public IActionResult downLoad(ClientModel client)
         {
-            return FileDownload(Db.ExecuteDataTable("SELECT * FROM TWTABLE"), "导出.xlsx");
+            return ExportData(Db.ExecuteDataTable("SELECT * FROM Demo"), "002001", "导出.xlsx");
         }
 
         public JsonResult GetData(ClientModel client)
         {
-            return this.Paging("SELECT * FROM TWTABLE", "id", client);
+            return this.Paging("SELECT * FROM Demo", "id", client);
         }
 
         public JsonResult Update(ClientModel client)
         {
             var data = client.GetEntity<dynamic>("data");
-
+            // 此处写代码保存
             return Json(new { status = 0 });
         }
 
         public JsonResult Delete(ClientModel client)
         {
             var data = client.GetEntity<List<dynamic>>("dels");
+            // 此处写代码删除
 
             return Json(new { status = 0 });
         }
