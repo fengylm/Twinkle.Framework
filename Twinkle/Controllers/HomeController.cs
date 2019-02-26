@@ -203,7 +203,7 @@ namespace Twinkle.Controllers
         public JsonResult GetColumnConfig(string code)
         {
             string strSQL = @"SELECT * FROM Sys_ColumnsForModule T
-                                INNER JOIN Sys_RoleForColumn T1 ON T.cModuleCode=T1.cModuleCode
+                                INNER JOIN Sys_RoleForColumn T1 ON T.cModuleCode=T1.cModuleCode AND T.cField=T1.cField
                                 INNER JOIN Sys_UserInRole T2 ON T1.nRoleID=T2.nRoleID AND T1.TenantId=T2.TenantId
                                 WHERE T.iShow=1 AND T.cModuleCode=@code and  T2.TenantId=@TenantId AND T2.UserId=@UserId
                             ORDER BY T.nOrderID";
@@ -222,7 +222,7 @@ namespace Twinkle.Controllers
                                 INNER JOIN Sys_UserInRole T2 ON T1.nRoleID=T2.nRoleID AND T1.TenantId=T2.TenantId 
                                 WHERE T.cModuleCode=@code AND T2.TenantId=@TenantId AND T2.UserId=@UserId";
 
-            return Json(new { status = 0, data = Db.ExecuteEntities<Sys_ColumnsForModule>(strSQL, new { code, Auth.TenantId, Auth.UserId }) });
+            return Json(new { status = 0, data = Db.ExecuteEntities<dynamic>(strSQL, new { code, Auth.TenantId, Auth.UserId }) });
 
         }
 
