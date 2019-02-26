@@ -178,14 +178,14 @@ namespace Twinkle.Controllers
                 }
                 List<Sys_Module> list = listModule.Where(p => p.nPID == item.ID).ToList();
 
-                GetRouterChildren(item.ID,router,list);
+                GetRouterChildren(router,list);
                 
                 lstRouter.Add(router);
             }
 
             return Json(lstRouter);
         }
-        public void GetRouterChildren(double? id,Router router,List<Sys_Module> list)
+        public void GetRouterChildren(Router router,List<Sys_Module> list)
         {
             foreach (var item in list)
             {
