@@ -61,7 +61,7 @@ namespace Twinkle.Areas.Base.Controllers
                 }
                 pNode.children.Add(subNode);
 
-                NodeBuilder(subNode, list);
+                NodeBuilder(subNode,list);
             }
             if (pNode.children == null)
             {
