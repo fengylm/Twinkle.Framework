@@ -91,10 +91,10 @@ namespace Twinkle.Controllers
 
             StringBuilder pagingBuild = new StringBuilder();
             pagingBuild.AppendLine("SELECT * FROM (");
-            pagingBuild.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY {orderBy}) _rowIndex,");
+            pagingBuild.AppendLine($"SELECT ROW_NUMBER() OVER(ORDER BY {orderBy}) xrowIndex,");
             pagingBuild.AppendLine(strSQL.Substring(bodyIndex));
             pagingBuild.AppendLine(") pagingTable WHERE 1=1");
-            pagingBuild.AppendLine($" AND _rowIndex>{(start ?? 0) * (limit ?? 0)} AND _rowIndex<={((start ?? 0) + 1) * (limit ?? int.MaxValue)}");
+            pagingBuild.AppendLine($" AND xrowIndex>{(start ?? 0) * (limit ?? 0)} AND xrowIndex<={((start ?? 0) + 1) * (limit ?? int.MaxValue)}");
 
             return Json(new
             {
