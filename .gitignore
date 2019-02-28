@@ -22,7 +22,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
-/Twinkle/web.config
+[Ww]eb.config
 
 # Visual Studio 2015 cache/options directory
 .vs/
