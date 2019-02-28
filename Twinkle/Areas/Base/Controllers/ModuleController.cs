@@ -150,9 +150,9 @@ namespace Twinkle.Areas.Base.Controllers
                 sortSQL = @"BEGIN TRAN
                                 DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_Module Where nPID=@nPID AND  ID<>@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND  ID<>@ID ORDER BY ISNULL(nOrderID,999999)
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY ISNULL(nOrderID,999999)
                                 
                                 UPDATE Sys_Module SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_Module.ID)
                                 WHERE nPID=@nPID
@@ -166,7 +166,7 @@ namespace Twinkle.Areas.Base.Controllers
                                 INSERT INTO @sortTable(ID)
                                 SELECT ID FROM Sys_Module Where nPID=@nPID AND  nOrderID<(SELECT nOrderID FROM Sys_Module WHERE ID=@nTID) AND ID<>@ID ORDER BY nOrderID
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_Module Where nPID=@nPID AND ID=@ID ORDER BY ISNULL(nOrderID,999999)
                                  INSERT INTO @sortTable(ID)
                                 SELECT ID FROM Sys_Module Where nPID=@nPID AND  nOrderID>=(SELECT nOrderID FROM Sys_Module WHERE ID=@nTID) AND ID<>@ID ORDER BY nOrderID
                                 
@@ -288,9 +288,9 @@ namespace Twinkle.Areas.Base.Controllers
                 sortSQL = @"BEGIN TRAN
                                 DECLARE @sortTable TABLE(nOrderID INT IDENTITY,ID int)
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  ID<>@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  ID<>@ID ORDER BY ISNULL(nOrderID,999999)
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY ISNULL(nOrderID,999999)
                                 
                                 UPDATE Sys_ColumnsForModule SET nOrderID=(SELECT nOrderID FROM @sortTable T WHERE T.ID=Sys_ColumnsForModule.ID)
                                 WHERE cModuleCode=@cModuleCode
@@ -304,7 +304,7 @@ namespace Twinkle.Areas.Base.Controllers
                                 INSERT INTO @sortTable(ID)
                                 SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  nOrderID<(SELECT nOrderID FROM Sys_ColumnsForModule WHERE ID=@TID) AND ID<>@ID ORDER BY nOrderID
                                 INSERT INTO @sortTable(ID)
-                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY nOrderID
+                                SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND ID=@ID ORDER BY ISNULL(nOrderID,999999)
                                  INSERT INTO @sortTable(ID)
                                 SELECT ID FROM Sys_ColumnsForModule Where cModuleCode=@cModuleCode AND  nOrderID>=(SELECT nOrderID FROM Sys_ColumnsForModule WHERE ID=@TID) AND ID<>@ID ORDER BY nOrderID
                                 
