@@ -10,6 +10,7 @@ using Twinkle.Framework.Security.Authorization;
 using Twinkle.Framework.Security.Cryptography;
 using Twinkle.Framework.SignalR;
 using Twinkle.Models;
+using System.Linq;
 
 namespace Twinkle.Controllers
 {
@@ -157,12 +158,14 @@ namespace Twinkle.Controllers
 
         public JsonResult GetRouters()
         {
-            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"select * from Sys_Module where nPID=0 and cCode in ( select cModuleCode from Sys_UserInRole T 
+            List<Sys_Module> listModule = Db.ExecuteEntities<Sys_Module>(@"select * from Sys_Module where  cCode in ( select cModuleCode from Sys_UserInRole T 
                                                                         left join Sys_RoleForModule T1 on T1.nRoleID = T.nRoleID and T1.TenantId = T.TenantId
                                                                         where T.TenantId = @TenantId and  T.UserId = @UserId ) order by nOrderID ", new { TenantId = Auth.TenantId, UserId = Auth.UserId });
+
+            var toplevel= listModule.Where(p => p.nPID == 0).ToList();
             List<Router> lstRouter = new List<Router>();
 
-            foreach (var item in listModule)
+            foreach (var item in toplevel)
             {
                 Router router = new Router();
                 router.Title = item.cTitle;
@@ -173,26 +176,30 @@ namespace Twinkle.Controllers
                 {
                     router.Children = new List<Router>();
                 }
-                List<Sys_Module> list = Db.ExecuteEntities<Sys_Module>(@"select * from Sys_Module where nPID=@nPID and cCode in ( select cModuleCode from Sys_UserInRole T 
-                                                                        left join Sys_RoleForModule T1 on T1.nRoleID=T.nRoleID and T1.TenantId=T.TenantId
-                                                                        where T.TenantId=@TenantId and  T.UserId=@UserId ) order by nOrderID", new { nPID = item.ID, TenantId = Auth.TenantId, UserId = Auth.UserId });
-                for (int i = 0; i < list.Count; i++)
-                {
-                    Router subRouter = new Router();
-                    subRouter.Title = list[i].cTitle;
-                    subRouter.Url = list[i].cRoute;
-                    subRouter.Path = list[i].cPath;
-                    subRouter.Icon = list[i].cIcon;
-                    if (subRouter.Children == null)
-                    {
-                        subRouter.Children = new List<Router>();
-                    }
-                    router.Children.Add(subRouter);
-                }
+                List<Sys_Module> list = listModule.Where(p => p.nPID == item.ID).ToList();
+
+                GetRouterChildren(router,list);
+                
                 lstRouter.Add(router);
             }
 
             return Json(lstRouter);
+        }
+        public void GetRouterChildren(Router router,List<Sys_Module> list)
+        {
+            foreach (var item in list)
+            {
+                Router subRouter = new Router();
+                subRouter.Title = item.cTitle;
+                subRouter.Url = item.cRoute;
+                subRouter.Path = item.cPath;
+                subRouter.Icon = item.cIcon;
+                if (subRouter.Children == null)
+                {
+                    subRouter.Children = new List<Router>();
+                }
+                router.Children.Add(subRouter);
+            }
         }
 
         /// <summary>
